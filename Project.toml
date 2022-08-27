@@ -1,0 +1,13 @@
+name = "DEBmicroTrait"
+uuid = "646e67d3-9d04-4312-a4b2-690a4059c727"
+authors = ["Gianna Marschmann"]
+version = "0.1.0"
+
+[compat]
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
