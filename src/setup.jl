@@ -1,7 +1,6 @@
 abstract type AbstractParams end
 abstract type AbstractSetup end
 
-
 struct Setup <: AbstractSetup
     n_polymers::Int64
     n_monomers::Int64
@@ -46,6 +45,4 @@ function split_state_batch(u::AbstractVector{<:Real}, p::AbstractParams)
     X    = u[1+n_polymers+n_monomers+2*n_microbes:n_polymers+n_monomers+2*n_microbes+n_enzymes]
     CO2  = u[1+n_polymers+n_monomers+2*n_microbes+n_enzymes:n_polymers+n_monomers+2*n_microbes+n_enzymes+n_microbes]
     return D, E, V, X, CO2
-end
-
 end
