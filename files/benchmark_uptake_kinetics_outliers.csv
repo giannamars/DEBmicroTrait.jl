@@ -1,0 +1,4 @@
+﻿Substrate,Taxonomy,Strain,Method and incubation time,umax [h-1],vmax [nmol/min/mg],Kt,Ktmodel,Reference
+Fructose,Thiobacillus sp.,A2,"Dyalisis rate of C14 labelled substrate, 5 min",0.39,74.8,410,1.86,"Wood, A. P., & Kelly, D. P. (1982). Kinetics of sugar transport byThiobacillus A2. Archives of Microbiology, 131(2), 156-159."
+Ribose,Thiobacillus sp.,A3,"Dyalisis rate of C14 labelled substrate, 5 min",0.03,30.8,69,0.82,"Wood, A. P., & Kelly, D. P. (1982). Kinetics of sugar transport byThiobacillus A2. Archives of Microbiology, 131(2), 156-159."
+Succinate,Bradyrhizobium japonicum,USDA 217,"Radioactivity uptake, 5 min",,3.3,1.8,0.17,"McALLISTER, C. F., & Lepo, J. E. (1983). Succinate transport by free-living forms of Rhizobium japonicum. Journal of Bacteriology, 153(3), 1155-1162."

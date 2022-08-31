@@ -13,7 +13,7 @@ BGE.f <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/isolates_b
 ##########################################################################################
 ## Taxonomic and Resource Variance Partitioning
 
-# Model 1: Isolate Identity 
+# Model 1: Isolate Identity
 fm1 <- lmer(BGE ~ as.factor(isolate) + (1|monomer/ontology), data = BGE.f)
 summary(fm1)$AIC
 r.squaredGLMM(fm1)
@@ -104,7 +104,7 @@ summary(lm.f)
 AIC(lm.f)
 
 ##########################################################################################
-## BGE-growth Regressions 
+## BGE-growth Regressions
 BGE.f.grouped <- BGE.f %>% group_by(response, ontology) %>% summarise(BGE_med = median(BGE), rgrowth_med = median(rgrowth), BP_med = median(BP), BR_med = median(BR))
 # low growth regime
 growthLOW <- lm(rgrowth_med ~ BGE_med, data = BGE.f.grouped[BGE.f.grouped$rgrowth_med < 0.0407, ])
@@ -140,20 +140,20 @@ ttest(modlow,2,1)
 #########################################################################################
 ## Random forest analysis
 # CUE
-df_train <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files_old/isolates_batch_model_train.csv")
+df_train <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/isolates_batch_model_train.csv")
 df_train$yield <- 1- df_train$yield
-df_test <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/isolates_batch_model_test.csv") 
+df_test <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/isolates_batch_model_test.csv")
 df_test$yield <- 1- df_test$yield
 # log transform data
 logdf_train <- log(df_train) %>% filter(!is.nan(BGE))
 logdf_test<- log(df_test) %>% filter(!is.nan(BGE))
-# boost 
+# boost
 boost.bge = gbm(BGE~., data=logdf_train, distribution="gaussian", n.trees=10000, interaction.depth = 8, shrinkage = 0.001)
 summary(boost.bge)
 
 #########################################################################################
 ## Flux variance
-# high 
+# high
 pchigh.f <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/isolates_batch_model_fluxes_high.csv")
 kruskal.test(pc1 ~ response, data = pchigh.f)
 dunnTest(pc1 ~ response, data = pchigh.f, method = "bh")
@@ -200,12 +200,10 @@ levins <- function(p_xi = ""){
 # Niche breadth
 Levin.f <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/isolates_batch_model_levin.csv") %>%
   replace(is.na(.), 0.0)
-Levin.f.std <- Levin.f[,1:83]/(apply(Levin.f[,1:83], 1, sum))  
+Levin.f.std <- Levin.f[,1:83]/(apply(Levin.f[,1:83], 1, sum))
 
 Levin.f.grouped <- BGE.f %>% group_by(isolate) %>% summarise(BGE_med = median(BGE), rgrowth_med = median(rgrowth))
 Levin.f.grouped$levins <- levins(Levin.f.std)
 Levin.f.grouped$response <- Levin.f$response
 plot(Levin.f.grouped$levins, Levin.f.grouped$BGE_med)
 plot(density(Levin.f.grouped$levins))
-
-
