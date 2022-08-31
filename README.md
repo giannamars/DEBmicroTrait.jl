@@ -7,9 +7,9 @@
 [![Coverage](https://codecov.io/gh/giannamars/DEBmicroTrait.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/giannamars/DEBmicroTrait.jl)
 
 
-**DEBmicroTrait** is a genome-informed trait-based dynamic energy budget modeling package developed for trait-based microbial modeling in Julia.
+**DEBmicroTrait** is a genome-informed trait-based dynamic energy budget modeling package developed for trait-based microbial modeling in Julia. The dynamic energy budget approach captures interacting strategies for energy and resource acquisition and allocation, letting the shape of trade-offs and trait variation at population or community level emerge in response to environmental conditions.
 
-The dynamic energy budget approach captures interacting strategies for energy and resource acquisition and allocation, letting the shape of trade-offs and trait variation at population or community level emerge in response to environmental conditions. In the current version, **DEBmicroTrait** can be built in batch mode, chemostat mode, or with time-dependent substrate forcings for any number of substrates (polymers, monomers), microbes, and enzymes. Representations of the soil mineral matrix and microscale-environment feedback on process rates (soil temperature, soil saturation and texture) can be added based on sample metadata availability.
+ In the current version, **DEBmicroTrait** can be built in batch mode, chemostat mode, or with time-dependent substrate forcings for any number of substrates (polymers, monomers), microbes, and enzymes. Representations of the soil mineral matrix and microscale-environment feedback on process rates (soil temperature, soil saturation and texture) can be added based on sample metadata availability.
 
 **DEBmicroTrait** enables integration of [microTrait](https://github.com/ukaraoz/microtrait) information. **microTrait** is an R package that provides a workflow to extract fitness traits from microbial genome sequences, and serves as a basis to constrain model parameters for maximum specific growth rate, substrate uptake kinetics, ribosome biosynthesis potential and extracellular enzyme synthesis. The model structure is based on synthesizing unit equilibrium chemistry approximation kinetics which guarantees scale-invariance across an arbitrary number of complex substrate-consumer reactions.
 
@@ -19,4 +19,4 @@ An iterative workflow for trait-based model development using the **DEBmicroTrai
 
  **microTrait** and **DEBmicroTrait** app development continues on [KBase](https://www.kbase.us/) under U.S. Department of Energy contract number DE-577AC02-05CH1123.   
 
-![DEBmicroTrait](/files/EESA21-042.png)
+<img src="/files/EESA21-042.png" width="48">
