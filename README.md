@@ -1,7 +1,7 @@
 # DEBmicroTrait
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://giannamars.github.io/DEBmicroTrait.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://giannamars.github.io/DEBmicroTrait.jl/dev/)
+[![DOI](https://zenodo.org/badge/529673789.svg)](https://zenodo.org/badge/latestdoi/529673789)
+
 
 
 **DEBmicroTrait** is a genome-informed trait-based dynamic energy budget modeling package developed for trait-based microbial modeling in Julia. The dynamic energy budget approach captures interacting strategies for energy and resource acquisition and allocation, letting the shape of trade-offs and trait variation at population or community level emerge in response to environmental conditions.
