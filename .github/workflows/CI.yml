@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - refactor_v18
     tags: '*'
   pull_request:
 concurrency:
