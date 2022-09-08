@@ -16,4 +16,4 @@
 
 An iterative workflow for trait-based model development using the **DEBmicroTrait** pipeline is outlined in our Review on *Life and Death in the Soil Microbiome* ([Box 2](https://www.nature.com/articles/s41579-022-00695-z)). The scripts on the main branch accompany a case study in the rhizosphere revealing how *Life History Strategies and Niches of Soil Bacteria Emerge from Interacting Thermodynamic, Biophysical, and Metabolic traits*  ([Preprint](https://www.biorxiv.org/content/10.1101/2022.06.29.498137v1.abstract)).
 
- **microTrait** and **DEBmicroTrait** app development and documentation continues on [KBase](https://www.kbase.us/research/pett-ridge-sfa/) under U.S. Department of Energy contract number DE-577AC02-05CH1123.   
+ **microTrait** and **DEBmicroTrait** app [development](https://github.com/giannamars/DEBmicroTraitKB) and documentation continues on [KBase](https://www.kbase.us/research/pett-ridge-sfa/) under U.S. Department of Energy contract number DE-577AC02-05CH1123.   
