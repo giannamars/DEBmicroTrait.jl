@@ -1,5 +1,6 @@
 module DEBmicroTrait
 
+using ModelParameters
 # using FieldMetadata,
 #       Unitful,
 #       Roots,
