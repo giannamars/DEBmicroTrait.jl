@@ -1,13 +1,12 @@
 abstract type AbstractAssimilation end
-
 abstract type AbstractAssimilationC <: AbstractAssimilation end
 
-@columns struct AssimilationC{NSB,KD,YDE,NC,NX} <: AbstractAssimilationC
-    N_SB::NSB   | mol/mol   | "Mol transporters per mol of biomass carbon"
-    K_D::KD     | mol/m^3   | "Reference half-saturation constant"
-    y_DE::YDE   | mol/mol   | "Yield on assimilation"
-    N_C::NC     | _         | "Number of C atoms per monomer"
-    N_X::NX     | _         | "Monomer id for return-on-investment"
+struct AssimilationC{NSB,KD,YDE,NC,NX} <: AbstractAssimilationC
+    N_SB::NSB   # Mol transporters per mol of biomass carbon [mol/mol]
+    K_D::KD     # Reference half-saturation constant [mol/m3]
+    y_DE::YDE   # Yield on assimilation [mol/mol]
+    N_C::NC     # Number of C atoms per monomer [-]
+    N_X::NX     # Monomer id for return-on-investment [-]
 end
 
 for fn in fieldnames(AssimilationC)

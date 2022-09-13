@@ -19,13 +19,12 @@ function Setup(n_polymers, n_monomers, n_microbes, n_enzymes, n_minerals)
     return Setup(n_polymers, n_monomers, n_microbes, n_enzymes, n_minerals, dim)
 end
 
-@selectable struct Params{SE,ME,AS,DEP,TU} <: AbstractParams
-    # Field                     | Selectable Types
-    setup_pars::SE              | AbstractSetup
-    metabolism_pars::ME         | AbstractMetabolism
-    assimilation_pars::AS       | AbstractAssimilation
-    depolymerization_pars::DEP  | Union{nothing, AbstractDepolymerization}
-    turnover_pars::TU           | AbstractTurnover
+struct Params{SE,ME,AS,DEP,TU} <: AbstractParams
+    setup_pars::SE
+    metabolism_pars::ME
+    assimilation_pars::AS
+    depolymerization_pars::DEP
+    turnover_pars::TU          
 end
 
 for fn in fieldnames(Params)

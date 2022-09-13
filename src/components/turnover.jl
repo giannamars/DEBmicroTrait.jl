@@ -1,18 +1,18 @@
 abstract type AbstractTurnover end
 
-@columns struct Turnover{gV0,gV1,gX,gDads,gXads,FED,FVD,FVP,FV,FXD,FXP,FX} <: AbstractTurnover
-    γ_V_0::gV0     | 1/h       | "Max. reserve and structure turnover rate"
-    γ_V_1::gV1     | mol/m^3   | "Half-saturation constant for reserve and structure turnover rate"
-    γ_X::gX        | 1/h       | "Enzyme turnover rate"
-    γ_D_ads::gDads | 1/h       | "Adsorbed monomer turnover rate"
-    γ_X_ads::gXads | 1/h       | "Adsorbed enzyme turnover rate"
-    f_ED::FED      | _         | "Fraction of decayed reserve recycling to monomers"
-    f_VD::FVD      | _         | "Fraction of decayed biomass recycling to monomer fractions"
-    f_VP::FVP      | _         | "Fraction of decayed biomass recycling to polymer fractions"
-    f_V::FV        | _         | "Fraction of decayed biomass recycling to monomers"
-    f_XD::FXD      | _         | "Fraction of decayed enzyme recycling to monomer fractions"
-    f_XP::FXP      | _         | "Fraction of decayed enzyme recycling to polymer fractions"
-    f_X::FX        | _         | "Fraction of decayed enzyme recycling to polymers"
+struct Turnover{gV0,gV1,gX,gDads,gXads,FED,FVD,FVP,FV,FXD,FXP,FX} <: AbstractTurnover
+    γ_V_0::gV0      # Max. reserve and structure turnover rate [1/h]
+    γ_V_1::gV1      # Half-saturation constant for reserve and structure turnover rate [mol/m3]
+    γ_X::gX         # Enzyme turnover rate [1/h]
+    γ_D_ads::gDads  # Adsorbed monomer turnover rate [1/h]
+    γ_X_ads::gXads  # Adsorbed enzyme turnover rate [1/h]
+    f_ED::FED       # Fraction of decayed reserve recycling to monomers [-]
+    f_VD::FVD       # Fraction of decayed biomass recycling to monomer fractions [-]
+    f_VP::FVP       # Fraction of decayed biomass recycling to polymer fractions [-]
+    f_V::FV         # Fraction of decayed biomass recycling to monomers [-]
+    f_XD::FXD       # Fraction of decayed enzyme recycling to monomer fractions [-]
+    f_XP::FXP       # Fraction of decayed enzyme recycling to polymer fractions [-]
+    f_X::FX         # Fraction of decayed enzyme recycling to polymers [-]
 end
 
 for fn in fieldnames(Turnover)

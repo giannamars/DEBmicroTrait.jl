@@ -1,14 +1,14 @@
 abstract type AbstractMetabolism end
 abstract type AbstractMetabolismC <: AbstractMetabolism end
 
-@columns struct MetabolismC{KE,YEV,KM,YEM,AX,YEX,MGT} <: AbstractMetabolismC
-    k_E::KE     | 1/h       | "Reserve export rate"
-    y_EV::YEV   | mol/mol   | "Yield of structure on reserve"
-    k_M::KM     | 1/h       | "Specific maintenance rate"
-    y_EM::YEM   | mol/mol   | "Maintenance yield on reserve vs structure"
-    α_X::AX     | _         | "Fraction of growth flux allocated to enzyme production"
-    y_EX::YEX   | mol/mol   | "Yield on enzyme production"
-    min_gt::MGT | 1/h       | "Minimum generation time"
+struct MetabolismC{KE,YEV,KM,YEM,AX,YEX,MGT} <: AbstractMetabolismC
+    k_E::KE     # Reserve export rate [1/h]
+    y_EV::YEV   # Yield of structure on reserve [mol/mol]
+    k_M::KM     # Specific maintenance rate [1/h]
+    y_EM::YEM   # Maintenance yield on reserve vs structure [mol/mol]
+    α_X::AX     # Fraction of growth flux allocated to enzyme production [-]
+    y_EX::YEX   # Yield on enzyme production [mol/mol]
+    min_gt::MGT # Minimum generation time [h]
 end
 
 for fn in fieldnames(MetabolismC)

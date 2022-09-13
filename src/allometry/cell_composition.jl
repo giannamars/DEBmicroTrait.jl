@@ -1,37 +1,3 @@
-abstract type AbstractIsolate end
-
-"""
-    CellComposition structure
-
-Structure that contains the cellular composition of isolates.
-"""
-@units @description mutable struct IsolateComposition <: AbstractIsolate
-    Cell_volume::Vector{Float64}        |  m^3   | "Cell volume"
-    Protein_volume::Vector{Float64}     |  m^3   | "Protein volume"
-    Ribosome_volume::Vector{Float64}    |  m^3   | "Ribosome volume"
-    Envelope_volume::Vector{Float64}    |  m^3   | "Cell envelope volume"
-    CNP::Matrix{Float64}                | _      | "Cell stoichiometry"
-    YEV::Matrix{Float64}                | mol/mol| "Yield of structure on CNP-reserve"
-end
-
-function IsolateComposition(Genome_size, Min_gen_time, Gram_stain)
-    V_cell = genome_size_to_cell_volume(collect(skipmissing(Genome_size)))
-    gmax   = log(2)./collect(skipmissing(Min_gen_time))
-    V_protein = cell_volume_to_protein_volume(V_cell)
-    V_r = cell_volume_to_ribosome_volume(V_cell, gmax)
-    V_env = cell_volume_to_envelope_volume(V_cell, collect(skipmissing(Gram_stain)))
-    CNP = zeros(3, size(V_cell,1))
-    for i in 1:size(V_cell,1)
-        CNP[:,i] = cell_volume_to_stoichiometry([V_cell[i]], [gmax[i]])
-    end
-    YEV = zeros(3, size(V_cell,1))
-    for i in 1:size(V_cell,1)
-        YEV[:,i] = cell_volume_to_yields([V_cell[i]], [gmax[i]])
-    end
-    return IsolateComposition(V_cell, V_protein, V_r, V_env, CNP, YEV)
-end
-
-
 function genome_size_to_cell_volume(L_DNA::Vector{Float64})
     # Kempes et al. (2016), Eq. 8
     v_N = 1.47e-27
