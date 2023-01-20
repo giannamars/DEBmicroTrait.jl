@@ -49,7 +49,7 @@ end
 function init_mixed_medium(id_isolate, assimilation, enzymes, maintenance, protein_synthesis, turnover)
     #
     n_polymers = 0
-    n_monomers = 22
+    n_monomers = 83
     n_microbes = 1
     n_enzymes  = 1
     n_minerals = 0
