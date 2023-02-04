@@ -19,29 +19,29 @@ condition(u,t,integrator) = u[1] - 1e-5
 affect!(integrator)       = terminate!(integrator)
 cb                        = ContinuousCallback(condition,affect!)
 
-BGE_tseries       = zeros(39, 83, 500)
-BR_tseries        = zeros(39, 83, 500)
-BP_tseries        = zeros(39, 83, 500)
-r_tseries         = zeros(39, 83, 500)
-x_tseries         = zeros(39, 83, 500)
-rG_CO2_tseries    = zeros(39, 83, 500)
-rM_CO2_tseries    = zeros(39, 83, 500)
-rX_CO2_tseries    = zeros(39, 83, 500)
-J_EX_tseries      = zeros(39, 83, 500)
-J_DE_tseries      = zeros(39, 83, 500)
-J_DE_CO2_tseries  = zeros(39, 83, 500)
-J_D_tseries       = zeros(39, 83, 500)
-J_ED_tseries      = zeros(39, 83, 500)
-J_V_tseries       = zeros(39, 83, 500)
-J_E_tseries       = zeros(39, 83, 500)
-t_tseries         = zeros(39, 83, 500)
-D_tseries         = zeros(39, 83, 500)
-E_tseries         = zeros(39, 83, 500)
-V_tseries         = zeros(39, 83, 500)
-X_tseries         = zeros(39, 83, 500)
-CO2_tseries       = zeros(39, 83, 500)
-N_cells_tseries   = zeros(39, 83, 500)
-maintenance_tseries    = zeros(39, 83, 500)
+BGE_tseries       = zeros(39, 83, 500) # BGE = BP/(BP + BR)
+BR_tseries        = zeros(39, 83, 500) # BR = assimilation respiration + growth respiration + enzyme production respiration + maintenance respiration
+BP_tseries        = zeros(39, 83, 500) # BP = E + V production
+r_tseries         = zeros(39, 83, 500) # realized growth rate
+x_tseries         = zeros(39, 83, 500) # constitutive enzyme production rate
+rG_CO2_tseries    = zeros(39, 83, 500) # growth respiration
+rM_CO2_tseries    = zeros(39, 83, 500) # maintenance respiration
+rX_CO2_tseries    = zeros(39, 83, 500) # enzyme production respiration
+J_EX_tseries      = zeros(39, 83, 500) # total enzyme production rate, i.e. x*V
+J_DE_tseries      = zeros(39, 83, 500) # assimilation flux
+J_DE_CO2_tseries  = zeros(39, 83, 500) # assimilation respiration
+J_D_tseries       = zeros(39, 83, 500) # uptake rate
+J_ED_tseries      = zeros(39, 83, 500) # recycling of reserve biomass E to substrates D
+J_V_tseries       = zeros(39, 83, 500) # strucutral biomass turnover rate
+J_E_tseries       = zeros(39, 83, 500) # reserve biomass turnover rate
+t_tseries         = zeros(39, 83, 500) # time
+D_tseries         = zeros(39, 83, 500) # Substrate concentration
+E_tseries         = zeros(39, 83, 500) # Reverve concentration
+V_tseries         = zeros(39, 83, 500) # Structural biomass concentration
+X_tseries         = zeros(39, 83, 500) # Enzyme concentration
+CO2_tseries       = zeros(39, 83, 500) # CO2 concentration
+N_cells_tseries   = zeros(39, 83, 500) # Conversion from total biomass to number of cells
+maintenance_tseries    = zeros(39, 83, 500) # maintenance respiration 
 
 for i in 1:39
     for j in 1:83
@@ -127,6 +127,12 @@ for i in 1:39
     end
 end
 
+
+
+plot(t_tseries[1,2,:], J_DE_CO2_tseries[1,2,:])
+plot!(t_tseries[1,2,:], rG_CO2_tseries[1,2,:])
+
+
 r_median        = zeros(39,83)
 x_median        = zeros(39,83)
 rG_CO2_median   = zeros(39,83)
@@ -139,6 +145,7 @@ J_D_median      = zeros(39,83)
 J_ED_median     = zeros(39,83)
 J_V_median      = zeros(39,83)
 J_E_median      = zeros(39,83)
+latency         = zeros(39,83)
 
 
 for i in 1:39
@@ -203,8 +210,16 @@ for i in 1:39
         catch
             J_E_median[i,j]  = NaN
         end
+        try
+            latency[i,j]    = t_tseries[i,j,:][findmax(rG_CO2_tseries[i,j,:])[2]]
+        catch
+            latency[i,j]    = NaN
+        end
     end
 end
+
+latency
+latency[latency .>= 1000] .= NaN
 
 
 dreserve_median = zeros(39,83)
@@ -242,8 +257,14 @@ ontology = Array{String}(undef,39,83)
 for i in 1:83
      ontology[:,i] .= df_metabolites.Ontology[i]
  end
-df_out.ontology = vec(ontology)
-CSV.write(joinpath(dir, "files/output/isolates_batch_model_fluxes.csv"), df_out)
+ df_out.ontology = vec(ontology)
+monomer = Array{String}(undef,39,83)
+for i in 1:83
+    monomer[:,i] .= df_metabolites.Name[i]
+ end
+df_out.monomer = vec(monomer)
+df_out.latency = vec(latency)
+CSV.write(joinpath(dir, "files/output/isolates_batch_model_fluxes_latency1.csv"), df_out)
 
 # output BGE-growth
 
