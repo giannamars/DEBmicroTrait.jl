@@ -1,7 +1,8 @@
 using DEBmicroTrait
-using CSV, DataFrames, Statistics
+using CSV, DataFrames, Statistics 
 using JLD
 using DifferentialEquations
+using Plots
 
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
 
@@ -9,14 +10,12 @@ dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
 df_metabolites = CSV.read(joinpath(dir, "files/input/1_10_R2A_medium.csv"), DataFrame, missingstring="N/A")
 
 # Load isolate parameterization, note: assimilation parameterization depends on media composition
-assimilation            = load(joinpath(dir, "files/output//isolates_assimilation_10_R2A.jld"))
+assimilation            = load(joinpath(dir, "files/output/isolates_assimilation_10_R2A.jld"))
 enzymes                 = load(joinpath(dir, "files/output/isolates_enzymes.jld"))
 maintenance             = load(joinpath(dir, "files/output/isolates_maintenance.jld"))
 protein_synthesis       = load(joinpath(dir, "files/output/isolates_protein_synthesis.jld"))
 turnover                = load(joinpath(dir, "files/output/isolates_turnover.jld"))
 initb                   = load(joinpath(dir, "files/output/isolates_batch_init.jld"))
-
-
 id_isolate = 1
 n_monomers = 43
 
@@ -34,3 +33,6 @@ u0[1+n_polymers:n_polymers+n_monomers]                                    .= df_
 tspan             = (0.0,192.0)
 prob              = ODEProblem(DEBmicroTrait.batch_model!,u0,tspan,p)
 sol               = solve(prob, alg_hints=[:stiff])
+
+plot(sol, idxs=[44]) # reserve
+plot(sol, idxs=[45]) # structure
