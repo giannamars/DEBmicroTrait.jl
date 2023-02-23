@@ -34,5 +34,12 @@ tspan             = (0.0,192.0)
 prob              = ODEProblem(DEBmicroTrait.batch_model!,u0,tspan,p)
 sol               = solve(prob, alg_hints=[:stiff])
 
+
+
 plot(sol, idxs=[44]) # reserve
 plot(sol, idxs=[45]) # structure
+
+Biomass = sol[44,:] + sol[45,:]
+N_cells = Biomass*1e-6*12.011/(initb["rhoB"][id_isolate]*initb["Md"][id_isolate])
+
+plot(sol.t, N_cells)
