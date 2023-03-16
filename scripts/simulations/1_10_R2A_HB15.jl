@@ -1,7 +1,7 @@
 using DEBmicroTrait
 using CSV, DataFrames, Statistics 
 using JLD
-using DifferentialEquations
+using OrdinaryDiffEq
 using Plots
 
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
@@ -29,28 +29,11 @@ u0[1+n_polymers+n_monomers:n_polymers+n_monomers+n_microbes]              .= 0.9
 u0[1+n_polymers+n_monomers+n_microbes:n_polymers+n_monomers+2*n_microbes] .= 0.1*initb["Bio0"][id_isolate]
 u0[1+n_polymers:n_polymers+n_monomers]                                    .= df_metabolites.Concentration
 
-
 tspan             = (0.0,172.0)
 prob              = ODEProblem(DEBmicroTrait.batch_model!,u0,tspan,p)
-sol               = solve(prob, alg_hints=[:stiff])
+sol               = solve(prob, Tsit5())
 
-E = sol[44,:]
-V = sol[45,:]
-Biomass = E .+ V
-plot(sol.t, Biomass)
+plot(sol, idxs=1:43)
 
-r = [DEBmicroTrait.growth!(0.0*ones(1), p.metabolism_pars, [sol[i][44]], [sol[i][45]])[1] for i in 1:size(sol.t,1)]
 
-y_VM  = p.metabolism_pars.y_EM./p.metabolism_pars.y_EV
-m_E   = E./V
-j_EC  = m_E.*(p.metabolism_pars.k_E .- r)
-j_EM  = p.metabolism_pars.k_M.*p.metabolism_pars.y_EM
-j_EM  = 0.1
-jEM   = min.(j_EC, j_EM)
-jVM   = (j_EM .- jEM).*y_VM./p.metabolism_pars.y_EM
 
-plot(sol.t, jEM)
-plot!(sol.t, jVM)
-plot!(sol.t, jVM)
-plot!(sol.t, E)
-plot!(sol.t, sol[1,:])

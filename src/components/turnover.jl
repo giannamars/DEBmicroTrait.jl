@@ -40,7 +40,15 @@ biomass_recycling!(J_VD::Vector{Float64}, p::AbstractTurnover, V::Vector{Float64
 end
 
 enzyme_recycling!(J_XD::Vector{Float64}, p::AbstractTurnover, X::Vector{Float64}) = begin
-    J_XD = (1 .- f_X(p)).*f_XD(p).*sum(γ_X(p).*X, dims=1)
-    J_XP = f_X(p).*f_XP(p).*sum(γ_X(p).*X, dims=1)
+    J_XD = f_XD(p).*sum((1 .- f_X(p)).*γ_X(p).*X, dims=1)
+    J_XP = f_XP(p).*sum(f_X(p).*γ_X(p).*X, dims=1)
     return J_XD, J_XP
+end
+
+adsorbed_monomer_decay!(J_D_ads::Vector{Float64}, p::AbstractTurnover, D_ads::Vector{Float64}) = begin
+    J_D_ads = γ_D_ads(p).*D_ads
+end
+
+adsorbed_enzyme_decay!(J_X_ads::Vector{Float64}, p::AbstractTurnover, X_ads::Vector{Float64}) = begin
+    J_X_ads = γ_X_ads(p).*X_ads
 end

@@ -1,7 +1,7 @@
 using DEBmicroTrait
 using CSV, DataFrames, Statistics, Tables
 using JLD
-using DifferentialEquations
+using OrdinaryDiffEq
 
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
 df_isolates             = CSV.read(joinpath(dir, "files/input/isolates2traits.csv"), DataFrame, missingstring="N/A")
@@ -22,6 +22,23 @@ cb                        = ContinuousCallback(condition,affect!)
 
 percent_uptake    = zeros(83, 39)
 J_D_tseries       = zeros(39, 83, 500)
+
+p                 = DEBmicroTrait.init_mixed_medium(id_isolate, 83, assimilation, enzymes, maintenance, protein_synthesis, turnover)
+n_polymers        = p.setup_pars.n_polymers
+n_monomers        = p.setup_pars.n_monomers
+n_microbes        = p.setup_pars.n_microbes
+
+u0                                                                         = zeros(p.setup_pars.dim)
+u0[1+n_polymers+n_monomers:n_polymers+n_monomers+n_microbes]              .= 0.9*initb["Bio0"][id_isolate]
+u0[1+n_polymers+n_monomers+n_microbes:n_polymers+n_monomers+2*n_microbes] .= 0.1*initb["Bio0"][id_isolate]
+u0[1+n_polymers:n_polymers+n_monomers]                                    .= 1.25/n_monomers
+
+
+tspan             = (0.0,30.0)
+prob              = ODEProblem(DEBmicroTrait.batch_model!,u0,tspan,p)
+sol               = solve(prob, Tsit5())
+
+plot(sol, idxs=1:83)
 
 for i in 1:39
     id_isolate = i
