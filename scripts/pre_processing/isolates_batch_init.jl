@@ -16,10 +16,11 @@ Gram_stain      = convert(Array{String,1}, df_isolates.gram_stain)##############
 
 ########################################
 dry_mass        = 0.47*DEBmicroTrait.cell_volume_to_dry_mass(V_cell, gmax, Gram_stain)
-#rho_cell        = DEBmicroTrait.cell_volume_to_cellular_density(V_cell, gmax, Gram_stain)
+d_cell          = DEBmicroTrait.cell_volume_to_cell_number_density(V_cell, gmax, Gram_stain)
 ρ_bulk          = 1.0 # g/cm^3
-N_cells         = 1e3
-Bio_0           = N_cells*1e6*ρ_bulk*dry_mass./12.011  #mol C/m^3 * g
+N_cells         = 1e3 # cells/g soil
+#Bio_0           = N_cells*1e6*ρ_bulk*dry_mass./12.011  
+Bio_0           = @. 1e9/(d_cell*6.022e23)
 ########################################
 
 ########################################
