@@ -1,7 +1,7 @@
 using DEBmicroTrait
 using CSV, DataFrames, Statistics 
 using JLD
-using DifferentialEquations
+using OrdinaryDiffEq
 using Plots
 
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
@@ -25,6 +25,7 @@ D_tseries         = zeros(39, 500)
 E_tseries         = zeros(39, 500)
 V_tseries         = zeros(39, 500)
 t_tseries         = zeros(39, 500)
+u_tseries         = zeros(39, 500)
 
 
 for i in 1:39
@@ -43,19 +44,24 @@ for i in 1:39
 
     tspan             = (0.0,500.0)
     prob              = ODEProblem(DEBmicroTrait.batch_model!,u0,tspan,p)
-    sol               = solve(prob, alg_hints=[:stiff])
+    sol               = solve(prob, Tsit5())
 
     r    = [DEBmicroTrait.growth!(0.0*ones(1), p.metabolism_pars, [sol[i][44]], [sol[i][45]])[1] for i in 1:size(sol.t,1)]
 
-    for k in 1:length(sol.t)
+    for k in 1:500
         r_tseries[i,k] = r[k]
     end
 
-    for k in 1:length(sol.t)
+    for k in 1:500
         t_tseries[i,k] =  sol.t[k]
         D_tseries[i,k] =  sol[k][1]
         E_tseries[i,k] =  sol[k][44]
         V_tseries[i,k] =  sol[k][45]
+    end
+
+    for k in 1:500
+        J_D      = DEBmicroTrait.uptake!(zeros(1), p.assimilation_pars, [sol[i][1]], [sol[k][3]])
+        u_tseries[i,k] = J_D[1]
     end
 end
 

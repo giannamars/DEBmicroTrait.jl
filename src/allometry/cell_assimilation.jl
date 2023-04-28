@@ -147,4 +147,8 @@ function specific_reference_affinity(l_c::Array{Float64,1}, b_c::Array{Float64,1
     any(x->x==true, isnan.(K_SC_0)) ? throw(DomainError("NaN in DEBmicroTrait.ECA_kinetics!"))  : return K_SC_0.*10
 end
 
-
+function reynolds_number(u_c::Array{Float64,1}, l_c::Array{Float64,1}, ν_kin::Float64)
+    # ν_kin = kinematic viscosity, u_c = swimming velocity, l_c = characteristic length
+    Re = @. u_c*l_c/ν_kin
+    return Re
+end

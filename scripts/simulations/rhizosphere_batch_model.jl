@@ -1,7 +1,7 @@
 using DEBmicroTrait
 using CSV, DataFrames, Statistics
 using JLD
-using DifferentialEquations
+using OrdinaryDiffEq
 
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
 df_isolates             = CSV.read(joinpath(dir, "files/input/isolates2traits.csv"), DataFrame, missingstring="N/A")
@@ -61,7 +61,7 @@ for i in 1:39
 
         tspan             = (0.0,1000.0)
         prob              = ODEProblem(DEBmicroTrait.batch_model!,u0,tspan,p)
-        sol               = solve(prob, alg_hints=[:stiff], callback=cb)
+        sol               = solve(prob, Tsit5())
 
         for k in 1:length(sol.t)
             t_tseries[i,j,k] = sol.t[k]
