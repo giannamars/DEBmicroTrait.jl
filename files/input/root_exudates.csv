@@ -1,84 +1,84 @@
-Name,Formula,ChEBI_ID,Molecular_weight,Ontology
-2-aminoisobutyric acid ,C4H9NO2,27971,103.1198,Amino acids
-"2,3-Dihydroxybenzoic acid",C7H6O4,18026,154.1201,Organic acids
-3-Dehydroshikimic acid,C7H8O5,30918,172.1354,Organic acids
-5-aminovaleric acid,C5H11NO2,15887,117.14638,Amino acids
-abscisic acid,C15H20O4 ,2365,264.3169,Organic acids
-adenine,C5H5N5,16708,135.1269,Nucleotides
-adenosine,C10H13N5O4,16335,267.24152,Nucleotides
-alanine,C3H7NO2,15570,89.09322,Amino acids
-alpha-ketoglutaric acid ,C5H6O5,30915,146.0981,Organic acids
-arginine,C6H14N4O2,29016,174.20112,Amino acids
-asparagine ,C4H8N2O3,22653,132.118,Amino acids
-betonicine,C7H13NO3,85533,159.183,Amino acids
-biotin ,C10H16N2O3S,15956,244.31172,Organic acids
-caffeic acid,C9H8O4,36281,180.1574,Organic acids
-choline,C5H13NO,15354,104.1708,Amino acids
-cis-aconitic acid,C6H6O6,32805,174.10824,Organic acids
-cytidine,C9H13N3O5,17562,243.21674,Nucleotides
-rhamnose,C6H12O5,26546,164.157,Sugars
-deoxyguanosine,C10H13N5O4,17172,267.2413,Nucleotides
-maltose,C12H22O11,17306,342.29648,Sugars
-sucrose,C12H22O11,17992,342.29648,Sugars
-fumaric acid ,C4H4O4,18012,116.0722,Organic acids
-aminobutyric acid,C4H9NO2,16865,103.1198,Amino acids
-glycine ,C2H5NO2,15428,75.06664,Amino acids
-glycine betaine,"	C5H11NO2",17750,117.14638,Amino acids
-guanine,C5H5N5O,16235,151.126,Nucleotides
-guanosine,C10H13N5O5,16750,283.24092,Nucleotides
-fructose,C6H12O6,15824,180.15588,Sugars
-glucose,C6H12O6,17234,180.15588,Sugars
-histidine,C6H9N3O2,27570,155.15468,Amino acids
-homoserine ,C4H9NO3,30653,119.1192,Amino acids
-hypoxanthine,C5H4N4O,17368,136.11162,Nucleotides
-indole-3-acetic acid,C10H9NO2 ,16411,175.184,Auxins
-inosine ,C10H12N4O5,17596,268.2261,Nucleotides
-isoleucine ,C6H13NO2,17191,131.175,Amino acids
-jasmonic acid,C12H18O3 ,18292,210.2695,Organic acids
-L-aspartic acid,C4H7NO4,17053,133.1027,Amino acids
-L-carnitine,C7H15NO3,17126,161.19894,Amino acids
-L-citrulline,C6H13N3O3,16349,175.18584,Amino acids
-L-glutamate ,C5H9NO4,16015,147.1293,Amino acids
-L-hydroxyproline,C5H9NO3,18240,131.1299,Amino acids
-L-pyroglutamic acid,C5H7NO3,18183,129.114,Amino acids
-L-tyrosine ,C9H11NO3,17895,181.18858,Amino acids
-lactic acid,C3H6O3,422,90.07794,Organic acids
-leucine,C6H13NO2,25017,131.17296,Amino acids
-linoleic acid,C18H32O2,17351,280.4455,Fatty acids
-lysine,C6H14N2O2,25094,146.18764,Amino acids
-malic acid,C4H6O5,6650,134.08744,Organic acids
-malonic acid ,C3H4O4,30794,104.06146,Organic acids
-methionine ,C5H11NO2S,16811,149.21238,Amino acids
-N-acetyl-D-glucosamine ,C8H15NO6,506227,221.2078,Sugars
-nicotinic acid,C6H5NO2,15940,123.10944,Organic acids
-ornithine,C5H12N2O2,18257,132.16106,Amino acids
-pantothenic acid ,C9H17NO5,7916,219.23502,Organic acids
-arabinose,C5H10O5,22599,150.1299,Sugars
-D-ribose,C5H10O5,16988,150.1299,Sugars
-xylose,C5H10O5,18222,150.13,Sugars
-phenylalanine ,C9H11NO2,28044,165.18918,Amino acids
-proline ,C5H9NO2,26271,115.1305,Amino acids
-salicylic acid,C7H6O3,16914,138.1207,Organic acids
-serine ,C3H7NO3,17822,105.09262,Amino acids
-shikimic acid,C7H10O5,16119,174.1513,Organic acids
-sinapyl alcohol,C11H14O4,28813,210.2265,Organic acids
-stachyhydrine,C7H13NO2,86534,143.1836,Organic acids
-succinic acid,C4H6O4,15741,118.088,Organic acids
-inositol,C6H12O6,17268,180.15588,Sugars
-syringic acid,C9H10O5,68329,198.1727,Organic acids
-taurine,C2H7NO3S,15891,125.148,Organic acids
-thiamine,C12H17N4OS,18385,265.35574,Organic acids
-threonic acid,C4H8O5,26984,136.103,Organic acids
-threonine ,C4H9NO3,26986,119.119,Amino acids
-thymidine,C10H14N2O5,17748,242.2286,Nucleotides
-trans-cinnamic acid,C9H8O2,35697,148.15862,Organic acids
-trans-ferulic acid,C10H10O4,17620,194.184,Organic acids
-trigonelline,C7H7NO2,18123,137.13602,Organic acids
-tryptophan,C11H12N2O2,27897,204.22526,Amino acids
-uracil,C4H4N2O2,17568,112.08684,Nucleotides
-uridine,C9H12N2O6,16704,244.20146,Nucleotides
-valine ,C5H11NO2,27266,117.14638,Amino acids
-vanillic acid,C8H8O4,30816,168.14672,Organic acids
-vanillin,C8H8O3,18346,152.1473,Organic acids
-xanthine,C5H4N4O2,15318,152.111,Nucleotides
-linoleic acid,C18H32O2,17351,280.4455,Fatty acids
+Name,Formula,ChEBI_ID,Molecular_weight,Ontology,Carboxylic,Hydroxyl,Methyl,Amino,Phosphate
+2-aminoisobutyric acid ,C4H9NO2,27971,103.1198,Amino acids,1,0,1,1,0
+"2,3-Dihydroxybenzoic acid",C7H6O4,18026,154.1201,Organic acids,1,2,0,0,0
+3-Dehydroshikimic acid,C7H8O5,30918,172.1354,Organic acids,1,1,0,0,0
+5-aminovaleric acid,C5H11NO2,15887,117.14638,Amino acids,1,0,0,1,0
+abscisic acid,C15H20O4 ,2365,264.3169,Organic acids,1,2,0,0,0
+adenine,C5H5N5,16708,135.1269,Nucleotides,0,0,0,1,0
+adenosine,C10H13N5O4,16335,267.24152,Nucleotides,0,0,0,0,1
+alanine,C3H7NO2,15570,89.09322,Amino acids,1,0,1,1,0
+alpha-ketoglutaric acid ,C5H6O5,30915,146.0981,Organic acids,2,0,0,0,0
+arginine,C6H14N4O2,29016,174.20112,Amino acids,1,0,0,1,0
+asparagine ,C4H8N2O3,22653,132.118,Amino acids,1,0,0,1,0
+betonicine,C7H13NO3,85533,159.183,Amino acids,1,2,0,1,0
+biotin ,C10H16N2O3S,15956,244.31172,Organic acids,1,0,0,1,0
+caffeic acid,C9H8O4,36281,180.1574,Organic acids,1,2,0,0,0
+choline,C5H13NO,15354,104.1708,Amino acids,0,1,0,0,0
+cis-aconitic acid,C6H6O6,32805,174.10824,Organic acids,2,1,0,0,0
+cytidine,C9H13N3O5,17562,243.21674,Nucleotides,0,0,0,1,0
+rhamnose,C6H12O5,26546,164.157,Sugars,0,5,0,0,0
+deoxyguanosine,C10H13N5O4,17172,267.2413,Nucleotides,0,1,0,0,1
+maltose,C12H22O11,17306,342.29648,Sugars,0,10,0,0,0
+sucrose,C12H22O11,17992,342.29648,Sugars,0,9,0,0,0
+fumaric acid ,C4H4O4,18012,116.0722,Organic acids,2,0,0,0,0
+aminobutyric acid,C4H9NO2,16865,103.1198,Amino acids,1,0,0,1,0
+glycine ,C2H5NO2,15428,75.06664,Amino acids,1,0,0,1,0
+glycine betaine,"	C5H11NO2",17750,117.14638,Amino acids,1,0,3,1,0
+guanine,C5H5N5O,16235,151.126,Nucleotides,0,0,0,1,0
+guanosine,C10H13N5O5,16750,283.24092,Nucleotides,0,4,0,1,0
+fructose,C6H12O6,15824,180.15588,Sugars,0,5,0,0,0
+glucose,C6H12O6,17234,180.15588,Sugars,0,5,0,0,0
+histidine,C6H9N3O2,27570,155.15468,Amino acids,1,0,0,1,0
+homoserine ,C4H9NO3,30653,119.1192,Amino acids,1,1,0,1,0
+hypoxanthine,C5H4N4O,17368,136.11162,Nucleotides,0,0,0,2,0
+indole-3-acetic acid,C10H9NO2 ,16411,175.184,Auxins,1,0,0,1,0
+inosine ,C10H12N4O5,17596,268.2261,Nucleotides,0,3,0,2,0
+isoleucine ,C6H13NO2,17191,131.175,Amino acids,1,1,1,1,0
+jasmonic acid,C12H18O3 ,18292,210.2695,Organic acids,1,0,2,0,0
+L-aspartic acid,C4H7NO4,17053,133.1027,Amino acids,1,0,0,1,0
+L-carnitine,C7H15NO3,17126,161.19894,Amino acids,1,1,0,1,0
+L-citrulline,C6H13N3O3,16349,175.18584,Amino acids,1,0,0,1,0
+L-glutamate ,C5H9NO4,16015,147.1293,Amino acids,1,0,0,1,0
+L-hydroxyproline,C5H9NO3,18240,131.1299,Amino acids,1,1,0,1,0
+L-pyroglutamic acid,C5H7NO3,18183,129.114,Amino acids,1,0,0,0,0
+L-tyrosine ,C9H11NO3,17895,181.18858,Amino acids,1,2,0,1,0
+lactic acid,C3H6O3,422,90.07794,Organic acids,1,1,0,0,0
+leucine,C6H13NO2,25017,131.17296,Amino acids,1,0,1,1,0
+linoleic acid,C18H32O2,17351,280.4455,Fatty acids,1,0,1,0,0
+lysine,C6H14N2O2,25094,146.18764,Amino acids,1,0,0,3,0
+malic acid,C4H6O5,6650,134.08744,Organic acids,1,1,0,0,0
+malonic acid ,C3H4O4,30794,104.06146,Organic acids,2,0,0,0,0
+methionine ,C5H11NO2S,16811,149.21238,Amino acids,1,0,1,1,0
+N-acetyl-D-glucosamine ,C8H15NO6,506227,221.2078,Sugars,0,1,0,1,0
+nicotinic acid,C6H5NO2,15940,123.10944,Organic acids,1,0,0,0,0
+ornithine,C5H12N2O2,18257,132.16106,Amino acids,2,0,0,2,0
+pantothenic acid ,C9H17NO5,7916,219.23502,Organic acids,1,1,0,1,0
+arabinose,C5H10O5,22599,150.1299,Sugars,0,4,0,0,0
+D-ribose,C5H10O5,16988,150.1299,Sugars,0,4,0,0,0
+xylose,C5H10O5,18222,150.13,Sugars,0,5,0,0,0
+phenylalanine ,C9H11NO2,28044,165.18918,Amino acids,0,0,0,1,0
+proline ,C5H9NO2,26271,115.1305,Amino acids,1,0,0,1,0
+salicylic acid,C7H6O3,16914,138.1207,Organic acids,1,1,0,0,0
+serine ,C3H7NO3,17822,105.09262,Amino acids,1,1,0,1,0
+shikimic acid,C7H10O5,16119,174.1513,Organic acids,2,1,0,0,0
+sinapyl alcohol,C11H14O4,28813,210.2265,Organic acids,0,1,1,0,0
+stachyhydrine,C7H13NO2,86534,143.1836,Organic acids,0,1,0,1,0
+succinic acid,C4H6O4,15741,118.088,Organic acids,2,0,0,0,0
+inositol,C6H12O6,17268,180.15588,Sugars,0,6,0,0,0
+syringic acid,C9H10O5,68329,198.1727,Organic acids,1,0,2,0,0
+taurine,C2H7NO3S,15891,125.148,Organic acids,0,0,0,1,0
+thiamine,C12H17N4OS,18385,265.35574,Organic acids,0,0,1,1,0
+threonic acid,C4H8O5,26984,136.103,Organic acids,1,0,0,0,0
+threonine ,C4H9NO3,26986,119.119,Amino acids,1,1,1,1,0
+thymidine,C10H14N2O5,17748,242.2286,Nucleotides,0,4,1,0,0
+trans-cinnamic acid,C9H8O2,35697,148.15862,Organic acids,1,0,0,0,0
+trans-ferulic acid,C10H10O4,17620,194.184,Organic acids,1,1,1,0,0
+trigonelline,C7H7NO2,18123,137.13602,Organic acids,1,1,0,0,0
+tryptophan,C11H12N2O2,27897,204.22526,Amino acids,1,0,0,2,0
+uracil,C4H4N2O2,17568,112.08684,Nucleotides,0,0,0,1,0
+uridine,C9H12N2O6,16704,244.20146,Nucleotides,0,1,0,1,0
+valine ,C5H11NO2,27266,117.14638,Amino acids,1,0,1,1,0
+vanillic acid,C8H8O4,30816,168.14672,Organic acids,1,0,1,0,0
+vanillin,C8H8O3,18346,152.1473,Organic acids,0,1,1,0,0
+xanthine,C5H4N4O2,15318,152.111,Nucleotides,0,0,0,2,0
+linoleic acid,C18H32O2,17351,280.4455,Fatty acids,1,0,1,0,0
