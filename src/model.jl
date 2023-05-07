@@ -17,7 +17,7 @@ function init_batch_model(id_isolate, id_monomer, assimilation, enzymes, mainten
     y_EX       = y_EV
     f_αX       = ones(n_enzymes)
     min_gt     = protein_synthesis["mingt"][id_isolate]
-    p_met      = MetabolismC([k_E], [y_EV], [k_M], [y_EM], [α_X], [y_EX], min_gt)
+    p_met      = MetabolismC([k_E], [y_EV], [k_M], [y_EM], [α_X], [y_EX], f_αX, min_gt)
     #
     N_SB       = assimilation["NSB"][id_monomer,id_isolate]
     K_D        = assimilation["KD"][id_monomer,id_isolate]
@@ -125,7 +125,7 @@ end
 ########################################################################################################################
 
 ########################################################################################################################
-# init_batch_model
+# init_ReSOM_model
 function init_ReSOM_model(n_polymers, n_monomers, n_microbes, n_enzymes, n_minerals)
     #
     #n_polymers = 1
