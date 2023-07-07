@@ -2,8 +2,7 @@ module DEBmicroTrait
 
 using SafeTestsets,
       Roots,
-      LinearAlgebra,
-      Distributions
+      LinearAlgebra
 
 export AbstractMetabolism, AbstractMetabolismC, MetabolismC
 export AbstractAssimilation, AbstractAssimilationC, AssimilationC, AssimilationCM
