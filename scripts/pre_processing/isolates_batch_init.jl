@@ -23,7 +23,7 @@ Bio_0           = N_cells*1e6*ρ_bulk*dry_mass./12.011  #mol C/m^3 * g
 
 ########################################
 # I/O
-save("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_batch_init.jld", "Bio0", Bio_0, "Md", dry_mass, "rhoB", ρ_bulk, "Ncells", N_cells)
+save(joinpath(dir, "files/output/isolates_batch_init.jld"), "Bio0", Bio_0, "Md", dry_mass, "rhoB", ρ_bulk, "Ncells", N_cells)
 ########################################
 
 

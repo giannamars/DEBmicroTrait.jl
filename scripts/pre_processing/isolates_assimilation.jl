@@ -109,4 +109,4 @@ a_s               = Vmax./K_D
 
 ########################################
 # I/O
-save("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_assimilation.jld", "rho", ρ_ps, "NSB", N_SB, "KD", K_D, "yEM", y_EM, "yDE", y_DEs, "NC", N_C)
+save(joinpath(dir, "files/output/isolates_assimilation.jld"), "rho", ρ_ps, "NSB", N_SB, "KD", K_D, "yEM", y_EM, "yDE", y_DEs, "NC", N_C)

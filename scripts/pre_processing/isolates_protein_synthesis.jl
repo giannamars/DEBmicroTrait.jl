@@ -29,5 +29,5 @@ y_EV            = DEBmicroTrait.relative_translation_efficiency_regression(rrn_c
 
 ########################################
 # I/O
-save("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_protein_synthesis.jld", "kE", k_E, "yEV", y_EV, "mingt", Min_gen_time)
+save(joinpath(dir, "files/output/isolates_protein_synthesis.jld"), "kE", k_E, "yEV", y_EV, "mingt", Min_gen_time)
 ########################################

@@ -18,5 +18,5 @@ zh              =  df_isolates.z_hydrolases./df_isolates.Genome_size*1e6
 
 ########################################
 # I/O
-save("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_enzymes.jld", "zh", zh, "alpha", α_X)
+save(joinpath(dir, "files/output/isolates_enzymes.jld"), "zh", zh, "alpha", α_X)
 ########################################

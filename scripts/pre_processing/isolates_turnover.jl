@@ -29,5 +29,6 @@ Bio_0           = 1e9*1e6*ρ_bulk*dry_mass./12.011
 
 ########################################
 # I/O
-save("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_turnover.jld", "gV0", γ_V_0, "gV1", γ_V_1)
+
+save(joinpath(dir, "files/output/isolates_turnover.jld"), "gV0", γ_V_0, "gV1", γ_V_1)
 ########################################

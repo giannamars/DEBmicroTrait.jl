@@ -21,4 +21,4 @@ k_M_med = median(k_M)
 
 ########################################
 # I/O
-save("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_maintenance.jld", "kM", k_M)
+save(joinpath(dir, "files/output/isolates_maintenance.jld"), "kM", k_M)
