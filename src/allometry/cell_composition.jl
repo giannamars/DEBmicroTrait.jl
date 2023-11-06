@@ -139,6 +139,30 @@ function cell_volume_to_cellular_density(V_c::Vector{Float64}, gmax::Vector{Floa
 end
 
 
+function cell_volume_to_cell_stoichiometry(L_DNA::Vector{Float64}, V_c::Vector{Float64}, gmax::Vector{Float64})
+    B_base   = 0.1075
+    v_N = 1.47e-27
+    B_DNA = v_N.*L_DNA
+    B = @. (B_base + B_DNA)
+    T   = cell_volume_to_protein_volume(V_c)./V_c
+    R   = cell_volume_to_ribosome_volume(V_c, gmax)./V_c
+    G   = @. 1.0 - (T+R+B)
+    C_T = 0.46
+    C_R = 0.36
+    C_B = 0.051
+    C_G = 0.542
+    N_T = 0.172
+    N_R = 0.155
+    N_B = 0.6
+    P_R = 0.92
+    P_B = 0.04
+    C_content = @. T*C_T + R*C_R + B*C_B + G*C_G
+    N_content = @. T*N_T + R*N_R + B*N_B
+    P_content = @. R*P_R + B*P_B
+    #return vcat(C_content, N_content, P_content).*100
+    return C_content./N_content
+end
+
 function genome_size_to_rRNA_copy_number(L_DNA::Vector{Float64})
     # Roller et al. (2016) - Supp. Fig. 1
     rRNA  = @. 2^(L_DNA./1e6 - 2^2.8)/0.66 + 1.0

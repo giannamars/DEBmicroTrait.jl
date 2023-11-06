@@ -1,6 +1,7 @@
 using DEBmicroTrait
 using CSV, DataFrames, Statistics
 using JLD
+using Plots
 using DifferentialEquations
 
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
@@ -13,6 +14,25 @@ maintenance             = load(joinpath(dir, "files/output/isolates_maintenance.
 protein_synthesis       = load(joinpath(dir, "files/output/isolates_protein_synthesis.jld"))
 turnover                = load(joinpath(dir, "files/output/isolates_turnover.jld"))
 initb                   = load(joinpath(dir, "files/output/isolates_batch_init.jld"))
+
+df = DataFrame()
+KD = zeros(39,83)
+for i in 1:83
+    KD[:,i] = assimilation["KD"][i,:]
+end
+df.KD = vec(KD)
+Vmax = zeros(39,83)
+for i in 1:83
+    Vmax[:,i] = assimilation["NSB"][i,:]
+end
+df.Vmax = vec(Vmax)
+ontology = Array{String}(undef,39,83)
+for i in 1:83
+     ontology[:,i] .= df_metabolites.Ontology[i]
+ end
+df.ontology = vec(ontology)
+df.response = repeat(df_isolates.Rhizosphere_response, 83)
+CSV.write(joinpath(dir, "files/output/isolates_assimilation.csv"), df)
 
 
 condition(u,t,integrator) = u[1] - 1e-5
@@ -127,6 +147,50 @@ for i in 1:39
     end
 end
 
+id_sucrose = 21
+id_nicotinic = 52
+id_IAA = 33
+id_tryptophan = 76
+
+# Need to multiply by biomass
+rG_CO2_sucrose = sum(rG_CO2_tseries, dims=1)[1,id_sucrose,:]
+rG_CO2_nicotinic = sum(rG_CO2_tseries, dims=1)[1,id_nicotinic,:]
+rG_CO2_IAA = sum(rG_CO2_tseries, dims=1)[1,id_IAA,:]
+rG_CO2_tryptophan = sum(rG_CO2_tseries, dims=1)[1,id_tryptophan,:]
+
+rM_CO2_sucrose = sum(rM_CO2_tseries, dims=1)[1,id_sucrose,:]
+rM_CO2_nicotinic = sum(rM_CO2_tseries, dims=1)[1,id_nicotinic,:]
+rM_CO2_IAA = sum(rM_CO2_tseries, dims=1)[1,id_IAA,:]
+rM_CO2_tryptophan = sum(rM_CO2_tseries, dims=1)[1,id_tryptophan,:]
+
+rX_CO2_sucrose = sum(rX_CO2_tseries, dims=1)[1,id_sucrose,:]
+rX_CO2_nicotinic = sum(rX_CO2_tseries, dims=1)[1,id_nicotinic,:]
+rX_CO2_IAA = sum(rX_CO2_tseries, dims=1)[1,id_IAA,:]
+rX_CO2_tryptophan = sum(rX_CO2_tseries, dims=1)[1,id_tryptophan,:]
+
+rA_CO2_sucrose = sum(J_DE_CO2_tseries, dims=1)[1,id_sucrose,:]
+rA_CO2_nicotinic = sum(J_DE_CO2_tseries, dims=1)[1,id_nicotinic,:]
+rA_CO2_IAA = sum(J_DE_CO2_tseries, dims=1)[1,id_IAA,:]
+rA_CO2_tryptophan = sum(J_DE_CO2_tseries, dims=1)[1,id_tryptophan,:]
+
+CO2_sucrose = @. rG_CO2_sucrose + rM_CO2_sucrose + rX_CO2_sucrose + rA_CO2_sucrose
+CO2_nicotinic = @. rG_CO2_nicotinic + rM_CO2_nicotinic + rX_CO2_nicotinic + rA_CO2_nicotinic
+CO2_IAA = @. rG_CO2_IAA + rM_CO2_IAA + rX_CO2_IAA + rA_CO2_IAA
+CO2_tryptophan = @. rG_CO2_tryptophan + rM_CO2_tryptophan + rX_CO2_tryptophan + rA_CO2_tryptophan
+
+plot(CO2_sucrose[1:100])
+plot!(CO2_nicotinic[1:100])
+plot!(CO2_IAA[1:100])
+plot!(CO2_tryptophan[1:100])
+
+plot(sum(J_DE_CO2_tseries, dims=1)[1,33,1:100])
+
+plot(rG_CO2_tseries[1,:,1:100])
+plot!(rG_CO2_tseries[1,52,1:100])
+plot(rG_CO2_tseries[5,33,1:100])
+plot!(rG_CO2_tseries[1,76,1:100])
+
+
 r_median        = zeros(39,83)
 x_median        = zeros(39,83)
 rG_CO2_median   = zeros(39,83)
@@ -139,6 +203,11 @@ J_D_median      = zeros(39,83)
 J_ED_median     = zeros(39,83)
 J_V_median      = zeros(39,83)
 J_E_median      = zeros(39,83)
+
+
+using Plots
+
+
 
 
 for i in 1:39

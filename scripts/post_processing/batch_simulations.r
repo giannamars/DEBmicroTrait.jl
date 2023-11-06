@@ -7,6 +7,7 @@ library("randomForest")
 library("gbm")
 library("diptest")
 library("olsrr")
+library("vegan")
 set.seed(1)
 
 ## Batch model BGE predictions
@@ -206,15 +207,45 @@ Levin.f <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/i
   replace(is.na(.), 0.0)
 Levin.f.std <- Levin.f[,1:83]/(apply(Levin.f[,1:83], 1, sum))  
 
-Levin.f.grouped <- BGE.f %>% group_by(isolate) %>% summarise(BGE_med = median(BGE), rgrowth_med = median(rgrowth))
+Levin.f.grouped <- BGE.f %>% group_by(isolate, response) %>% summarise(BGE_med = median(BGE), rgrowth_med = median(rgrowth))
 Levin.f.grouped$levins <- levins(Levin.f.std)
-Levin.f.grouped$response <- Levin.f$response
 plot(Levin.f.grouped$levins, Levin.f.grouped$BGE_med)
 m1 <- lm(log(BGE_med) ~ log(levins), data=Levin.f.grouped)
 summary(m1)
 plot(density(Levin.f.grouped$BGE_med))
 dip.test(Levin.f.grouped$levins, simulate=TRUE, B=5000)
 
+Levin.f.grouped.neg <- Levin.f.grouped %>% filter(response=="negative")
+plot(Levin.f.grouped.neg$levins, Levin.f.grouped.neg$BGE_med)
+m1 <- lm(log(BGE_med) ~ log(levins), data=Levin.f.grouped.neg)
+summary(m1)
+plot(density(Levin.f.grouped.neg$BGE_med))
+dip.test(Levin.f.grouped.neg$levins, simulate=TRUE, B=5000)
+
+
+Levin.f.grouped.pos <- Levin.f.grouped %>% filter(response=="positive")
+plot(Levin.f.grouped.pos$levins, Levin.f.grouped.pos$BGE_med)
+m1 <- lm(log(BGE_med) ~ log(levins), data=Levin.f.grouped.pos)
+summary(m1)
+plot(density(Levin.f.grouped.pos$BGE_med))
+dip.test(Levin.f.grouped.pos$levins, simulate=TRUE, B=5000)
+
+
+Levin.f.grouped.und <- Levin.f.grouped %>% filter(response=="undefined")
+plot(Levin.f.grouped.und$levins, Levin.f.grouped.und$BGE_med)
+m1 <- lm(log(BGE_med) ~ log(levins), data=Levin.f.grouped.und)
+summary(m1)
+plot(density(Levin.f.grouped.und$BGE_med))
+dip.test(Levin.f.grouped.und$levins, simulate=TRUE, B=5000)
+
 #write.csv(Levin.f.grouped, "/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_levins_grouped.csv")
 
+df_exudates <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait_Full/files_old/exudation_properties.csv")
+
+
+diversity(c(df_exudates$week3), index = "shannon")
+diversity(c(df_exudates$week6,df_exudates$week9), index = "shannon")
+diversity(c(df_exudates$week12), index = "shannon")
+
+df_train_p <- df_train %>% filter(response=="positive")
 
