@@ -22,7 +22,7 @@ K_D_plant = vcat(median(assimilation["KD"][id_sugars,:], dims=1), median(assimil
                     median(assimilation["KD"][id_organics,:], dims=1), median(assimilation["KD"][id_fattys,:], dims=1),
                     median(assimilation["KD"][id_auxins,:], dims=1), median(assimilation["KD"][id_nucleos,:], dims=1))
 
- y_DE_plant = vcat(median(assimilation["yDE"][id_sugars,:], dims=1), median(assimilation["yDE"][id_aminos,:], dims=1),
+y_DE_plant = vcat(median(assimilation["yDE"][id_sugars,:], dims=1), median(assimilation["yDE"][id_aminos,:], dims=1),
                     median(assimilation["yDE"][id_organics,:], dims=1), median(assimilation["yDE"][id_fattys,:], dims=1),
                     median(assimilation["yDE"][id_auxins,:], dims=1), median(assimilation["yDE"][id_nucleos,:], dims=1))
 
@@ -30,6 +30,7 @@ N_C_plant   = vcat([median(assimilation["NC"][id_sugars])], [median(assimilation
                     [median(assimilation["NC"][id_organics])], [median(assimilation["NC"][id_fattys])],
                     [median(assimilation["NC"][id_auxins])], [median(assimilation["NC"][id_nucleos])])
 
+id_sugars               = [21, 31]  # only sugars detected in week 3
 LC_MS_3     = vcat([median(df_metabolites.week3[id_sugars])], [median(df_metabolites.week3[id_aminos])],
                    [median(df_metabolites.week3[id_organics])], [median(df_metabolites.week3[id_fattys])],
                    [median(df_metabolites.week3[id_auxins])], [median(df_metabolites.week3[id_nucleos])]) 

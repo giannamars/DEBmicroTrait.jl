@@ -3,7 +3,6 @@ using JLD2
 using Plots, Dates
 using OrdinaryDiffEq
 
-
 # I/O
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd();
 avena_ex                = load(joinpath(dir, "files/avena/avena_exudation_2006_2022.jld2"));
@@ -18,8 +17,11 @@ tstop = month_hours*months*nyears
 MONTHS = [Dates.LOCALES["english"].months... Dates.LOCALES["english"].months...]
 xticks_month=(repeat((0:month_hours:tstop),nyears), repeat(MONTHS[1:months], nyears))
 xticks_year = ((0:month_hours*12:month_hours*12*nyears), string.(collect(range(start=2006,step=1,stop=2022))))
-plot(avena_ex["exudation_rate"], xticks=xticks_year, xrotation=90)
+plot(avena_ex["exudation_rate"][1:8760], xticks=xticks_month, xrotation=90)
+plot(avena_ex["exudation_rate"][1:8760])
+
 plot(avena_root["root_C"], xticks=xticks_year,  xrotation = 90)
+
 
 # ODE
 p_force = Forcing(avena_root["root_C"], γ_root, avena_ex["exudation_rate"])

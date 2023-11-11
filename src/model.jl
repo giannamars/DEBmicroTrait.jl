@@ -230,8 +230,8 @@ end
 
 
 ########################################################################################################################
-# batch model
-function batch_model!(du, u, p, t)
+# rhizosphere model
+function rhizosphere_model!(du, u, p, t)
     P, D, E, V, X, D_ads, X_ads, CO2 = split_state_ReSOM(u, p)
     # setup
     n_polymers                = p.setup_pars.n_polymers
@@ -258,8 +258,6 @@ function batch_model!(du, u, p, t)
     J_X_ads      = adsorbed_enzyme_decay!(zeros(n_enzymes), p.turnover_pars, X_ads)
      # depolymerization
     J_P, J_PD, J_XM    = depolymerization!(zeros(n_polymers), p.depolymerization_pars, P, X)
-    # forcing 
-    #spl_ex       = root_exudation(p.forcing_pars)
     # system
     @. du[1:n_polymers] = - J_P + J_VP + J_XP
     @. du[1+n_polymers:n_polymers+n_monomers] = - J_D + J_PD - J_DM + J_ED + J_VD + J_XD + J_D_ads
