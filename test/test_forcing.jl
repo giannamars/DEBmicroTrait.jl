@@ -1,7 +1,9 @@
-using DEBmicroTrait, Test
+using DEBmicroTrait
+using Dates
 using JLD2
-using Plots, Dates
 using OrdinaryDiffEq
+using Plots
+using Test
 
 # I/O
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd();
