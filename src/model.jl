@@ -138,12 +138,14 @@ function init_rhizosphere_model(assimilation, enzymes, maintenance, protein_synt
     f_ED       = rand(Dirichlet(n_monomers, 1));
     #f_ED       = zeros(n_monomers);
     #f_V        = rand(n_microbes);    # fraction of structural biomass recycling to monomers
-    f_V        = rand(n_microbes);    # fraction of structural biomass recycling to monomers
+    #f_V        = rand(n_microbes);    # fraction of structural biomass recycling to monomers
+    f_V        = zeros(n_microbes);    # fraction of structural biomass recycling to monomers
     f_VD       = rand(Dirichlet(n_monomers, 1));
     #f_VD       = zeros(n_monomers);
     f_VP       = rand(Dirichlet(n_polymers, 1));
     #f_VP       = zeros(n_polymers);
-    f_X        = rand(n_enzymes);   # fraction of enzymes recycling to monomers
+    #f_X        = rand(n_enzymes);   # fraction of enzymes recycling to monomers
+    f_X        = zeros(n_enzymes);   # fraction of enzymes recycling to monomers
     f_XD       = rand(Dirichlet(n_monomers, 1));
     #f_XD       = zeros(n_monomers);
     f_XP       = rand(Dirichlet(n_polymers, 1));
@@ -152,8 +154,8 @@ function init_rhizosphere_model(assimilation, enzymes, maintenance, protein_synt
     #
     Χ_0        = 10.0*ones(n_polymers);
     V_E        = 5.0*ones(n_enzymes);
-    #α_kin_P    = 3.79e-7*ones(n_polymers,n_enzymes);
-    α_kin_P    = 3.79e-3*ones(n_polymers,n_enzymes);
+    α_kin_P    = 3.79e-7*ones(n_polymers,n_enzymes);
+    #α_kin_P    = 3.79e-3*ones(n_polymers,n_enzymes);
     K_EP_P     = 3.05*ones(n_polymers,n_enzymes);
     α_kin_M    = ones(n_minerals, n_enzymes);
     K_MX       = ones(n_minerals, n_enzymes);
@@ -168,7 +170,7 @@ function init_rhizosphere_model(assimilation, enzymes, maintenance, protein_synt
     p_depoly   = DepolymerizationM(Χ_0, V_E, α_kin, K_EP, M, f_PD);
     #
     γ_root                  = 5e-5;
-    p_forcing = Forcing(avena_root["root_C"], γ_root, avena_ex["exudation_rate"]);
+    p_forcing = Forcing(avena_root["root_C"], γ_root, avena_ex["exudation_rate"]./10.0);
     #
     p = ParamsF(p_set, p_met, p_ass, p_depoly, p_turn, p_forcing);
     return p

@@ -1,0 +1,10 @@
+prefix=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env
+exec_prefix=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env
+libdir=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env/lib
+includedir=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env/include
+
+Name: libjpeg
+Description: A SIMD-accelerated JPEG codec that provides the libjpeg API
+Version: 3.0.0
+Libs: -L${libdir} -ljpeg
+Cflags: -I${includedir}

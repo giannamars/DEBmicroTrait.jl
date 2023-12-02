@@ -1,0 +1,53 @@
+{
+    "arch": "x86_64",
+    "build": "hf0c8a7f_1",
+    "build_number": 1,
+    "build_string": "hf0c8a7f_1",
+    "channel": "https://conda.anaconda.org/conda-forge/osx-64",
+    "constrains": [
+        "expat 2.5.0.*"
+    ],
+    "depends": [],
+    "extracted_package_dir": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/libexpat-2.5.0-hf0c8a7f_1",
+    "files": [
+        "lib/libexpat.1.8.10.dylib",
+        "lib/libexpat.1.dylib"
+    ],
+    "fn": "libexpat-2.5.0-hf0c8a7f_1.conda",
+    "license": "MIT",
+    "license_family": "MIT",
+    "link": {
+        "source": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/libexpat-2.5.0-hf0c8a7f_1",
+        "type": 1
+    },
+    "md5": "6c81cb022780ee33435cca0127dd43c9",
+    "name": "libexpat",
+    "package_tarball_full_path": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/libexpat-2.5.0-hf0c8a7f_1.tar.bz2",
+    "paths_data": {
+        "paths": [
+            {
+                "_path": "lib/libexpat.1.8.10.dylib",
+                "path_type": "hardlink",
+                "sha256": "0db8e79ba343f9cb8f33f82546c4ab0a191cd64a80bfc7dbe983952cebbdf7f4",
+                "sha256_in_prefix": "0db8e79ba343f9cb8f33f82546c4ab0a191cd64a80bfc7dbe983952cebbdf7f4",
+                "size_in_bytes": 175920
+            },
+            {
+                "_path": "lib/libexpat.1.dylib",
+                "path_type": "softlink",
+                "sha256_in_prefix": "0db8e79ba343f9cb8f33f82546c4ab0a191cd64a80bfc7dbe983952cebbdf7f4",
+                "size_in_bytes": 175920
+            }
+        ],
+        "paths_version": 1
+    },
+    "platform": "osx",
+    "requested_spec": "",
+    "sha256": "80024bd9f44d096c4cc07fb2bac76b5f1f7553390112dab3ad6acb16a05f0b96",
+    "size": 69602,
+    "subdir": "osx-64",
+    "timestamp": 1680191040160,
+    "track_features": "",
+    "url": "https://conda.anaconda.org/conda-forge/osx-64/libexpat-2.5.0-hf0c8a7f_1.conda",
+    "version": "2.5.0"
+}

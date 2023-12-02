@@ -1,0 +1,74 @@
+{
+    "arch": "x86_64",
+    "build": "h0dc2134_0",
+    "build_number": 0,
+    "build_string": "h0dc2134_0",
+    "channel": "https://conda.anaconda.org/conda-forge/osx-64",
+    "constrains": [],
+    "depends": [],
+    "extracted_package_dir": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/xorg-libxau-1.0.11-h0dc2134_0",
+    "files": [
+        "include/X11/Xauth.h",
+        "lib/libXau.6.0.0.dylib",
+        "lib/libXau.6.dylib",
+        "lib/libXau.dylib",
+        "lib/pkgconfig/xau.pc"
+    ],
+    "fn": "xorg-libxau-1.0.11-h0dc2134_0.conda",
+    "license": "MIT",
+    "license_family": "MIT",
+    "link": {
+        "source": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/xorg-libxau-1.0.11-h0dc2134_0",
+        "type": 1
+    },
+    "md5": "9566b4c29274125b0266d0177b5eb97b",
+    "name": "xorg-libxau",
+    "package_tarball_full_path": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/xorg-libxau-1.0.11-h0dc2134_0.tar.bz2",
+    "paths_data": {
+        "paths": [
+            {
+                "_path": "include/X11/Xauth.h",
+                "path_type": "hardlink",
+                "sha256": "f1932c6db3bac9f4f39bdd03c75702c1ace8813410f6216f8d9fe291f0f7e2f8",
+                "sha256_in_prefix": "f1932c6db3bac9f4f39bdd03c75702c1ace8813410f6216f8d9fe291f0f7e2f8",
+                "size_in_bytes": 3818
+            },
+            {
+                "_path": "lib/libXau.6.0.0.dylib",
+                "path_type": "hardlink",
+                "sha256": "9fab7db14a2e2fe3245d7eb520775be656f439a3b297a0126dc2142bc1201e69",
+                "sha256_in_prefix": "9fab7db14a2e2fe3245d7eb520775be656f439a3b297a0126dc2142bc1201e69",
+                "size_in_bytes": 14320
+            },
+            {
+                "_path": "lib/libXau.6.dylib",
+                "path_type": "softlink",
+                "sha256_in_prefix": "9fab7db14a2e2fe3245d7eb520775be656f439a3b297a0126dc2142bc1201e69",
+                "size_in_bytes": 14320
+            },
+            {
+                "_path": "lib/libXau.dylib",
+                "path_type": "softlink",
+                "sha256_in_prefix": "9fab7db14a2e2fe3245d7eb520775be656f439a3b297a0126dc2142bc1201e69",
+                "size_in_bytes": 14320
+            },
+            {
+                "_path": "lib/pkgconfig/xau.pc",
+                "path_type": "hardlink",
+                "sha256": "7b8965e24faf1113a1240b8ccb2a160cb2f6b8a599f233f2ca39e218b2c59f64",
+                "sha256_in_prefix": "b1ad15b96252f66b5a937f5d8bcb6ec4b38a6e89a82f541ecef9abca13f84d50",
+                "size_in_bytes": 485
+            }
+        ],
+        "paths_version": 1
+    },
+    "platform": "osx",
+    "requested_spec": "",
+    "sha256": "8a2e398c4f06f10c64e69f56bcf3ddfa30b432201446a0893505e735b346619a",
+    "size": 13071,
+    "subdir": "osx-64",
+    "timestamp": 1684638167647,
+    "track_features": "",
+    "url": "https://conda.anaconda.org/conda-forge/osx-64/xorg-libxau-1.0.11-h0dc2134_0.conda",
+    "version": "1.0.11"
+}

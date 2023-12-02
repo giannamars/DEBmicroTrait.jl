@@ -20,8 +20,10 @@ root_2020               = load(joinpath(dir, "files/avena/root_2020.jld2"));
 root_2021               = load(joinpath(dir, "files/avena/root_2021.jld2"));
 root_2022               = load(joinpath(dir, "files/avena/root_2022.jld2"));
 
+
 # root exudation rate 
-r_soil                  = 5e-3
+r_soil                  = 2.3e-3
+#r_soil                  = 5e-3
 V_soil                  = pi*(r_soil)^3
 exudC_2006              = abs.(root_2006["exudC"].*root_2006["rootEC"]/V_soil)
 exudC_2007              = abs.(root_2007["exudC"].*root_2007["rootEC"]/V_soil)
@@ -40,6 +42,8 @@ exudC_2019              = abs.(root_2019["exudC"].*root_2019["rootEC"]/V_soil)
 exudC_2020              = abs.(root_2020["exudC"].*root_2020["rootEC"]/V_soil)
 exudC_2021              = abs.(root_2021["exudC"].*root_2021["rootEC"]/V_soil)
 exudC_2022              = abs.(root_2022["exudC"].*root_2022["rootEC"]/V_soil)
+
+#plot(abs.(root_2018["exudC"].*root_2018["rootEC"]*12*24/8e-3))
 
 exudation_rate          = vcat(exudC_2006, exudC_2007, exudC_2008, exudC_2009, exudC_2010, exudC_2011,
                                exudC_2012, exudC_2013, exudC_2014, exudC_2015, exudC_2016, exudC_2017,

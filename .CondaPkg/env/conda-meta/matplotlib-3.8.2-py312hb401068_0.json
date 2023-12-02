@@ -1,0 +1,39 @@
+{
+    "arch": "x86_64",
+    "build": "py312hb401068_0",
+    "build_number": 0,
+    "build_string": "py312hb401068_0",
+    "channel": "https://conda.anaconda.org/conda-forge/osx-64",
+    "constrains": [],
+    "depends": [
+        "matplotlib-base >=3.8.2,<3.8.3.0a0",
+        "python >=3.12,<3.13.0a0",
+        "python_abi 3.12.* *_cp312",
+        "tornado >=5"
+    ],
+    "extracted_package_dir": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/matplotlib-3.8.2-py312hb401068_0",
+    "files": [],
+    "fn": "matplotlib-3.8.2-py312hb401068_0.conda",
+    "license": "PSF-2.0",
+    "license_family": "PSF",
+    "link": {
+        "source": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/matplotlib-3.8.2-py312hb401068_0",
+        "type": 1
+    },
+    "md5": "926f479dcab7d6d26bba7fe39f67e3b2",
+    "name": "matplotlib",
+    "package_tarball_full_path": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/matplotlib-3.8.2-py312hb401068_0.tar.bz2",
+    "paths_data": {
+        "paths": [],
+        "paths_version": 1
+    },
+    "platform": "osx",
+    "requested_spec": "matplotlib[version='>=1']",
+    "sha256": "fa7bd7d7262b3eca2720188dddaaf38b86ba0173cf2cd54c1cd30b175f66c3ca",
+    "size": 8508,
+    "subdir": "osx-64",
+    "timestamp": 1700510167553,
+    "track_features": "",
+    "url": "https://conda.anaconda.org/conda-forge/osx-64/matplotlib-3.8.2-py312hb401068_0.conda",
+    "version": "3.8.2"
+}

@@ -1,0 +1,46 @@
+{
+    "arch": "x86_64",
+    "build": "h0dc2134_1",
+    "build_number": 1,
+    "build_string": "h0dc2134_1",
+    "channel": "https://conda.anaconda.org/conda-forge/osx-64",
+    "constrains": [],
+    "depends": [
+        "libbrotlidec 1.1.0 h0dc2134_1",
+        "libbrotlienc 1.1.0 h0dc2134_1"
+    ],
+    "extracted_package_dir": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/brotli-bin-1.1.0-h0dc2134_1",
+    "files": [
+        "bin/brotli"
+    ],
+    "fn": "brotli-bin-1.1.0-h0dc2134_1.conda",
+    "license": "MIT",
+    "link": {
+        "source": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/brotli-bin-1.1.0-h0dc2134_1",
+        "type": 1
+    },
+    "md5": "ece565c215adcc47fc1db4e651ee094b",
+    "name": "brotli-bin",
+    "package_tarball_full_path": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/brotli-bin-1.1.0-h0dc2134_1.tar.bz2",
+    "paths_data": {
+        "paths": [
+            {
+                "_path": "bin/brotli",
+                "path_type": "hardlink",
+                "sha256": "5afa42ce81df5f925813d44b46f275fba3ffce8871b76d50b31b1d086f4d4580",
+                "sha256_in_prefix": "5afa42ce81df5f925813d44b46f275fba3ffce8871b76d50b31b1d086f4d4580",
+                "size_in_bytes": 27840
+            }
+        ],
+        "paths_version": 1
+    },
+    "platform": "osx",
+    "requested_spec": "",
+    "sha256": "7ca3cfb4c5df314ed481301335387ab2b2ee651e2c74fbb15bacc795c664a5f1",
+    "size": 16660,
+    "subdir": "osx-64",
+    "timestamp": 1695990286737,
+    "track_features": "",
+    "url": "https://conda.anaconda.org/conda-forge/osx-64/brotli-bin-1.1.0-h0dc2134_1.conda",
+    "version": "1.1.0"
+}

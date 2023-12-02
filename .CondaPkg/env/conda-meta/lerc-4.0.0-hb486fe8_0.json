@@ -1,0 +1,77 @@
+{
+    "arch": "x86_64",
+    "build": "hb486fe8_0",
+    "build_number": 0,
+    "build_string": "hb486fe8_0",
+    "channel": "https://conda.anaconda.org/conda-forge/osx-64",
+    "constrains": [],
+    "depends": [
+        "libcxx >=13.0.1"
+    ],
+    "extracted_package_dir": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/lerc-4.0.0-hb486fe8_0",
+    "files": [
+        "include/Lerc_c_api.h",
+        "include/Lerc_types.h",
+        "lib/libLerc.4.dylib",
+        "lib/libLerc.dylib",
+        "lib/pkgconfig/Lerc.pc"
+    ],
+    "fn": "lerc-4.0.0-hb486fe8_0.tar.bz2",
+    "license": "Apache-2.0",
+    "license_family": "Apache",
+    "link": {
+        "source": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/lerc-4.0.0-hb486fe8_0",
+        "type": 1
+    },
+    "md5": "f9d6a4c82889d5ecedec1d90eb673c55",
+    "name": "lerc",
+    "package_tarball_full_path": "/Users/glmarschmann/.julia/scratchspaces/0b3b1443-0f03-428d-bdfb-f27f9c1191ea/root/pkgs/lerc-4.0.0-hb486fe8_0.tar.bz2",
+    "paths_data": {
+        "paths": [
+            {
+                "_path": "include/Lerc_c_api.h",
+                "path_type": "hardlink",
+                "sha256": "51c3d4c683eac91beb16e521a7ae38516ac06b867dc12e5555961cb7d1975e65",
+                "sha256_in_prefix": "51c3d4c683eac91beb16e521a7ae38516ac06b867dc12e5555961cb7d1975e65",
+                "size_in_bytes": 22507
+            },
+            {
+                "_path": "include/Lerc_types.h",
+                "path_type": "hardlink",
+                "sha256": "4887c98b138f7cebaa4f26699e9a8647d612058892b261c37395728b3695b038",
+                "sha256_in_prefix": "4887c98b138f7cebaa4f26699e9a8647d612058892b261c37395728b3695b038",
+                "size_in_bytes": 1285
+            },
+            {
+                "_path": "lib/libLerc.4.dylib",
+                "path_type": "hardlink",
+                "sha256": "7e74546dbe96aba19791ab1c8b3de9128fcd86b6decc29ef6a2bee1aa9d0e852",
+                "sha256_in_prefix": "7e74546dbe96aba19791ab1c8b3de9128fcd86b6decc29ef6a2bee1aa9d0e852",
+                "size_in_bytes": 833240
+            },
+            {
+                "_path": "lib/libLerc.dylib",
+                "path_type": "softlink",
+                "sha256_in_prefix": "7e74546dbe96aba19791ab1c8b3de9128fcd86b6decc29ef6a2bee1aa9d0e852",
+                "size_in_bytes": 833240
+            },
+            {
+                "_path": "lib/pkgconfig/Lerc.pc",
+                "path_type": "hardlink",
+                "sha256": "e1e5270c8b7e0e5d51a8e138775a1a0f76ae4a872db4de33a9b4e205624ea7b6",
+                "sha256_in_prefix": "7af685cd8d7ee95de1925e6741811053b14121f5b6e6a406ac8b6284b50514d4",
+                "size_in_bytes": 526
+            }
+        ],
+        "paths_version": 1
+    },
+    "platform": "osx",
+    "requested_spec": "",
+    "sha256": "e41790fc0f4089726369b3c7f813117bbc14b533e0ed8b94cf75aba252e82497",
+    "size": 290319,
+    "subdir": "osx-64",
+    "timestamp": 1657977526749,
+    "track_features": "",
+    "url": "https://conda.anaconda.org/conda-forge/osx-64/lerc-4.0.0-hb486fe8_0.tar.bz2",
+    "version": "4.0.0"
+}

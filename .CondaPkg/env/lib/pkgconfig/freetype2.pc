@@ -1,0 +1,14 @@
+prefix=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env
+exec_prefix=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env
+libdir=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env/lib
+includedir=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env/include
+
+Name: FreeType 2
+URL: https://freetype.org
+Description: A free, high-quality, and portable font engine.
+Version: 24.3.18
+Requires: 
+Requires.private: 
+Libs: -L/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env/lib -lfreetype
+Libs.private: -lz -L/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env/lib -lpng16 -lz
+Cflags: -I${includedir}/freetype2

@@ -1,0 +1,11 @@
+prefix=/Users/glmarschmann/.julia/dev/DEBmicroTrait/.CondaPkg/env
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: XCB Xv
+Description: XCB Xv Extension
+Version: 1.15
+Requires.private: xcb xcb-shm
+Libs: -L${libdir} -lxcb-xv
+Cflags: -I${includedir}
