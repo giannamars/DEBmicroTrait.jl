@@ -2,8 +2,9 @@ library("tidyverse")
 library("broom")
 
 ## Rhizosphere model predictions
-rhizo.f <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/rhizosphere_model_2006.csv")  
-
+rhizo.f <- read.csv("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/rhizosphere_model_0_2018.csv") %>% filter(relabundance < 0.75) %>%
+  drop_na() %>% filter(sample=="week3" | sample=="week6" | sample=="week9" | sample=="week12")
+ 
 rhizo.f %>%
   nest(data = -sample) %>%
   mutate(

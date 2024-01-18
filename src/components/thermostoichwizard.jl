@@ -26,7 +26,7 @@ function get_stoich_electron_donor(elementstring::String)
     e = chemical_indices[5] #S
     f = chemical_indices[6] #P
     z = 0
-    return [-1,  -(3*a+4*e-d), a, c, e, f, 5*a+b-4*c-2*d+7*e-f, -z+4*a+b-3*c-2*d+5*e-2*f, 0, 0]
+    return [-1,  -(3*a+4*e-d), a, c, e, f, 5*a+b-4*c-2*d+7*e-f, -z+4*a+b-3*c-2*d+5*e-2*f, 0, 0] #stoichD (ySource,yH2o,yHco3,yNh4,yHpo4,yHs,yH,yE,yAcc,yBio)
 end
 
 
@@ -75,19 +75,19 @@ function get_stoich_anabolic_reaction(elementstring::String, chemFormBiom)
     yE = -zB+4*aB+bB-3*cB-2*dB+5*eB-2*fB
 
     stoichAnStarB = [ySource,yH2o,yHco3,yNh4,yHpo4,yHs,yH,yE,0,0]
-    stoichAnStarB = -stoichAnStarB
-    stoichAnStarB[end] = stoichAnStarB[1]
+    stoichAnStarB = -stoichAnStarB # biosynthesis (as opposite to biomass oxidation)
+    stoichAnStarB[end] = stoichAnStarB[1]  # change the location of biomass in the vector
     stoichAnStarB[1] = 0
 
     # O2
     stoichAnStar_O2 = stoichAnStarB+(1/a)*stoich_electron_donor
-    yEana = stoichAnStar_O2[8]
+    yEana = stoichAnStar_O2[8]  # #stoichi coeff for e of anabolism, it could be negative
     if yEana > 0.0
-        yEa = stoich_electron_acceptor[8]
+        yEa = stoich_electron_acceptor[8]   #require e acceptor
         stoichAn_O2 = stoichAnStar_O2-yEana/yEa*stoich_electron_acceptor
-    elseif yEana < 0.0
+    elseif yEana < 0.0  #e required for biosynthesis, c source is more reduced than the biomass
         yEd = stoich_electron_donor[8]
-        stoichAn_O2 = stoichAnStar_O2-yEana/yEd*stoich_electron_donor
+        stoichAn_O2 = stoichAnStar_O2-yEana/yEd*stoich_electron_donor  #required e donor
     else
         stoichAn_O2 = stoichAnStar_O2
     end
@@ -117,25 +117,25 @@ function get_lambda(elementstring::String, chemFormBiom)
 
     ne = -z+4*a+b-3*c-2*d+5*e-2*f  # number of electrons transferred in D
     nosc = -(ne/a) + 4
-    delGcox0PerC = 60.3-28.5*nosc  # kJ/C-mol
-    delGcox0 = delGcox0PerC*a*abs(stoich_electron_donor[1])
+    delGcox0PerC = 60.3-28.5*nosc  # kJ/C-mol at 25 degC and 1 bar
+    delGcox0 = delGcox0PerC*a*abs(stoich_electron_donor[1]) # energy of Rd half reaction kJ/rxn 
     # - estimate delGf0 for electron donor
     delGf0_D_zero = 0
-    delGf0_zero = [delGf0_D_zero, -237.2, -586.8, -79.3, -1096.1, 12.1, 0, 0, 16.4, -67]
-    delGcox0_zero = dot(delGf0_zero, stoich_electron_donor)
-    delGf0_D_est = (delGcox0-delGcox0_zero)/stoich_electron_donor[1]
+    delGf0_zero = [delGf0_D_zero, -237.2, -586.8, -79.3, -1096.1, 12.1, 0, 0, 16.4, -67] # aerobic respiration
+    delGcox0_zero = dot(delGf0_zero, stoich_electron_donor) #energy of Rd half reaction withou counting OC
+    delGf0_D_est = (delGcox0-delGcox0_zero)/stoich_electron_donor[1] #estimated energy of OC (x*stoiD+delGcox0_zero=delGd0)
     # - finally, delGf0
-    delGf0 = delGf0_zero
+    delGf0 = delGf0_zero  # free energy vector of Rd half reaction
     delGf0[1] = delGf0_D_est
 
-    # - standard delG at pH=0
+    # - standard delG at pH=0, 25 degC and 1 bar
     delGcat0 = dot(delGf0, stoich_cat_rxns)
     delGan0_O2 = dot(delGf0, stoich_anabolic_O2)
     delGan0_HCO3 = dot(delGf0, stoich_anabolic_HCO3)
 
     # - stadard delG at pH=7
     R = 0.008314  # kJ/(K.mol)
-    T = 298  # K
+    T = 298.15  # K
     iProton = 7  # [eD,h2o,hco3-,nh4+,hpo4**2-,hs-,h+,e-,eA,biom]
     delGcox = delGcox0+R*T*stoich_electron_donor[iProton]*log(1e-7)
     delGcat = delGcat0+R*T*stoich_cat_rxns[iProton]*log(1e-7)

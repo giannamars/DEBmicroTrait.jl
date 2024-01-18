@@ -124,8 +124,8 @@ function init_rhizosphere_model(assimilation, enzymes, maintenance, protein_synt
     y_DE       = assimilation["yDE"];
     N_C        = assimilation["NC"];
     N_X        = 1.0*ones(n_monomers);
-    #M          = 50e-6*ones(n_minerals);
-    M          = zeros(n_minerals);
+    M          = 50e-6*ones(n_minerals);
+    #M          = zeros(n_minerals);
     p_ass      = AssimilationCM(N_SB, K_D, y_DE, N_C, N_X, M);
     #
     γ_V0       = turnover["gV0"];
@@ -170,7 +170,7 @@ function init_rhizosphere_model(assimilation, enzymes, maintenance, protein_synt
     p_depoly   = DepolymerizationM(Χ_0, V_E, α_kin, K_EP, M, f_PD);
     #
     γ_root                  = 5e-5;
-    p_forcing = Forcing(avena_root["root_C"], γ_root, avena_ex["exudation_rate"]./10.0);
+    p_forcing = Forcing(avena_root["root_C"], γ_root, avena_ex["exudation_rate"]);
     #
     p = ParamsF(p_set, p_met, p_ass, p_depoly, p_turn, p_forcing);
     return p
