@@ -37,12 +37,18 @@ start2018 = week3start
 tspan = [8760*(nyears-1)+1,Int(tstop)]
 prob = ODEProblem(test!,u0,tspan,p_force)
 sol = solve(prob, Tsit5());
-#plot(sol, vars=1, xticks=xticks_month, xrotation=90)
+plot(sol, idxs=2, xticks=xticks_month, xrotation=90)
 week3C_2018 = sol(week3start+week_hours*3, idxs=1) - sol(week3start, idxs=1);
 week6C_2018 = sol(week3start+week_hours*6, idxs=1) - sol(week3start+week_hours*3+1, idxs=1);
 week9C_2018 = sol(week3start+week_hours*9, idxs=1) - sol(week3start+week_hours*6+1, idxs=1);
 week12C_2018 = sol(week3start+week_hours*12, idxs=1) - sol(week3start+week_hours*9+1, idxs=1);
 totalC_2018 = sol(tstop, idxs=1);
+
+week3C_2018_root = sol(week3start+week_hours*3, idxs=2);
+week6C_2018_root = sol(week3start+week_hours*6, idxs=2);
+week9C_2018_root = sol(week3start+week_hours*9, idxs=2);
+week12C_2018_root = sol(week3start+week_hours*12, idxs=2);
+totalC_2018_root = sol(tstop, idxs=2);
 
 # rate
 #plot(ex_rate[8760*(nyears-1)+1:Int(tstop)], xticks=xticks_month, xrotation=90, ylabel="molC/m3/hr", label="2022")
@@ -76,6 +82,12 @@ week9C_2012 = sol(week3start+week_hours*9, idxs=1) - sol(week3start+week_hours*6
 week12C_2012 = sol(week3start+week_hours*12, idxs=1) - sol(week3start+week_hours*9+1, idxs=1)
 totalC_2012 = sol(tstop, idxs=1);
 
+week3C_2012_root = sol(week3start+week_hours*3, idxs=2);
+week6C_2012_root = sol(week3start+week_hours*6, idxs=2);
+week9C_2012_root = sol(week3start+week_hours*9, idxs=2);
+week12C_2012_root = sol(week3start+week_hours*12, idxs=2);
+totalC_2012_root = sol(tstop, idxs=2);
+
 # rate
 #plot(ex_rate[8760*(nyears-1)+1:Int(tstop)], xticks=xticks_month, xrotation=90, ylabel="molC/m3/hr", label="2022")
 week3rate_2012 = median(ex_rate[week3start:week3start+week_hours*3])
@@ -108,6 +120,13 @@ week6C_2013 = sol(week3start+week_hours*6, idxs=1) - sol(week3start+week_hours*3
 week9C_2013 = sol(week3start+week_hours*9, idxs=1) - sol(week3start+week_hours*6+1, idxs=1)
 week12C_2013 = sol(week3start+week_hours*12, idxs=1) - sol(week3start+week_hours*9+1, idxs=1)
 totalC_2013 = sol(tstop, idxs=1);
+
+week3C_2013_root = sol(week3start+week_hours*3, idxs=2);
+week6C_2013_root = sol(week3start+week_hours*6, idxs=2);
+week9C_2013_root = sol(week3start+week_hours*9, idxs=2);
+week12C_2013_root = sol(week3start+week_hours*12, idxs=2);
+totalC_2013_root = sol(tstop, idxs=2);
+
 
 # rate
 #plot(ex_rate[8760*(nyears-1)+1:Int(tstop)], xticks=xticks_month, xrotation=90, ylabel="molC/m3/hr", label="2022")
@@ -143,6 +162,12 @@ week9C_2006 = sol(week3start+week_hours*9, idxs=1) - sol(week3start+week_hours*6
 week12C_2006 = sol(week3start+week_hours*12, idxs=1) - sol(week3start+week_hours*9+1, idxs=1)
 totalC_2006 = sol(tstop, idxs=1);
 
+week3C_2006_root = sol(week3start+week_hours*3, idxs=2);
+week6C_2006_root = sol(week3start+week_hours*6, idxs=2);
+week9C_2006_root = sol(week3start+week_hours*9, idxs=2);
+week12C_2006_root = sol(week3start+week_hours*12, idxs=2);
+totalC_2006_root = sol(tstop, idxs=2);
+
 # rate
 #plot(ex_rate[8760*(nyears-1)+1:Int(tstop)], xticks=xticks_month, xrotation=90, ylabel="molC/m3/hr", label="2022")
 week3rate_2006 = median(ex_rate[week3start:week3start+week_hours*3])
@@ -159,6 +184,7 @@ jldsave("files/output/timeseries_avena2006.jld2"; rateseries_2006, totalCseries_
 df_out = DataFrame()
 df_out.weeks = vcat(repeat(["week3"], 4), repeat(["week6"], 4), repeat(["week9"], 4), repeat(["week12"], 4))
 df_out.weekC = vcat(week3C_2018, week3C_2013, week3C_2012, week3C_2006, week6C_2018, week6C_2013, week6C_2012, week6C_2006, week9C_2018, week9C_2013, week9C_2012, week9C_2006, week12C_2018, week12C_2013, week12C_2012, week12C_2006)
+df_out.weekCroot = vcat(week3C_2018_root, week3C_2013_root, week3C_2012_root, week3C_2006_root, week6C_2018_root, week6C_2013_root, week6C_2012_root, week6C_2006_root, week9C_2018_root, week9C_2013_root, week9C_2012_root, week9C_2006_root, week12C_2018_root, week12C_2013_root, week12C_2012_root, week12C_2006_root)
 df_out.rateC = vcat(week3rate_2018, week3rate_2013, week3rate_2012, week3rate_2006, week6rate_2018, week6rate_2013, week6rate_2012, week6rate_2006, week9rate_2018, week9rate_2013, week9rate_2012, week9rate_2006, week12rate_2018, week12rate_2013, week12rate_2012, week12rate_2006)
 df_out.years = vcat(repeat(["2018"], 4), repeat(["2013"], 4), repeat(["2012"], 4), repeat(["2006"], 4))
 df_out.totalC = vcat(repeat([totalC_2018], 4), repeat([totalC_2013], 4), repeat([totalC_2012], 4), repeat([totalC_2006], 4))
