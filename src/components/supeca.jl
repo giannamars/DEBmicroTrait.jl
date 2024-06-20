@@ -39,6 +39,7 @@ function ECA_kinetics!(ECA::Matrix{T}, S::Vector{T}, E::Vector{T}, K::Matrix{T},
     any(x->x==true, isnan.(ECA)) ? throw(DomainError("NaN in DEBmicroTrait.ECA_kinetics!")) : return ECA
 end
 
+
 function ECA_kinetics!(ECA::Matrix{T}, S::Vector{T}, E::Vector{T}, K::Matrix{T}, k2p::Matrix{T}, N_SB::Matrix{T}) where {T<:Real}
     (I,J) = size(K)
     @assert I == size(S,1)
@@ -55,6 +56,7 @@ function ECA_kinetics!(ECA::Matrix{T}, S::Vector{T}, E::Vector{T}, K::Matrix{T},
 
     any(x->x==true, isnan.(ECA)) ? throw(DomainError("NaN in DEBmicroTrait.ECA_kinetics!")) : return ECA
 end
+
 
 function SUPECA_kinetics!(SUPECA::Array{T}, A::Vector{T}, B::Vector{T}, E::Vector{T}, K::Array{T}, k2p::Array{T}, N_SB::Array{T}) where {T<:Real}
     (I,J,L) = size(K)
