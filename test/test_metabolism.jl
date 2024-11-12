@@ -9,8 +9,9 @@ y_EM    = 1.0*ones(1)
 α_X     = 0.0*ones(1)
 y_EX    = 1.0*ones(1)
 mingt   = 1.0*ones(1)
+f_ax    = 1.0*ones(1)
 
-p       = MetabolismC(k_E, y_EV, k_M, y_EM, α_X, y_EX, mingt)
+p       = MetabolismC(k_E, y_EV, k_M, y_EM, α_X, y_EX, f_ax, mingt)
 E       = 1.0*ones(1)
 V       = 1.0*ones(1)
 
@@ -31,8 +32,9 @@ y_EM    = 1.0*ones(n_consumers)
 α_X     = 0.0*ones(n_consumers)
 y_EX    = 1.0*ones(n_consumers)
 mingt   = 1.0*ones(n_consumers)
+f_ax    = 1.0*ones(n_consumers)
 
-p       = MetabolismC(k_E, y_EV, k_M, y_EM, α_X, y_EX, mingt)
+p       = MetabolismC(k_E, y_EV, k_M, y_EM, α_X, y_EX, f_ax,mingt)
 E       = 1.0*ones(n_consumers)
 V       = 1.0*ones(n_consumers)
 
