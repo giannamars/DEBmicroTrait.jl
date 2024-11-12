@@ -41,7 +41,6 @@ function transporter_density(V_c::Array{Float64,1}, N_p::Array{Float64,2})
     return ρ_p
 end
 
-
 function interception_probability(V_c::Array{Float64,1}, N_p::Array{Float64,2})
     r_p = 1e-9                    
     r_c = (3*V_c/(4*pi)).^(1/3)
@@ -146,6 +145,57 @@ function specific_reference_affinity(l_c::Array{Float64,1}, b_c::Array{Float64,1
     #
     any(x->x==true, isnan.(K_SC_0)) ? throw(DomainError("NaN in DEBmicroTrait.ECA_kinetics!"))  : return K_SC_0.*10
 end
+
+function specific_affinity(V_c::Vector{Float64}, ρ_p::Matrix{Float64}, D_S::Vector{Float64}, pct_sand::Float64, pct_clay::Float64, s_sat::Float64, N_cell::Vector{Float64})
+    # N_p (number of transporters) -> ρ_p = N_p*4*pi*r_p^2/(4*pi*r_c^2) (transporter density on the cell surface)
+    V_S = 180.0                   # k2p, [s]
+    N_A = 6.022e23                # Avogrado constant [1/mol]
+    ϕ_w, τ_g, τ_w, δ  = soil_affinity_properties(pct_sand, pct_clay, s_sat)
+    K_SC_0 = specific_reference_affinity(V_c, ρ_p, D_S)
+
+    r_p = 1e-9                    # porter radius, 1 μm
+    r_c = (3*V_c/(4*pi)).^(1/3)   # cell radius
+    #
+    p_inv = zeros(size(ρ_p,1), size(ρ_p,2))
+    for i in 1:size(ρ_p,2)
+        p_inv[:,i] = @. (4*ρ_p[:,i]*r_c[i]^2/r_p + pi*r_c[i])/(4*ρ_p[:,i]*r_c[i]^2/r_p)
+    end
+    #
+    K_SC_0 = zeros(size(ρ_p,1), size(ρ_p,2))
+    for i in 1:size(ρ_p,2)
+        K_SC_0[:,i] = @. ((V_S*ρ_p[:,i]*r_c[i])/(pi*D_S*r_p^2*N_A))*p_inv[:,i]
+    end
+    #
+    any(x->x==true, isnan.(K_SC_0)) ? throw(DomainError("NaN in DEBmicroTrait.ECA_kinetics!"))  : return K_SC_0.*10
+end
+
+function affinity_constant(ρ_p::Array{Float64,2}, V_c::Array{Float64,1}, D_S::Array{Float64,1}, pct_sand::Float64, pct_clay::Float64, s_sat::Float64, N_cell::Array{Float64,1})
+    V_S = 100.0
+    N_A = 6.022e23
+    ϕ_w, τ_g, τ_w, δ  = soil_affinity_properties(pct_sand, pct_clay, s_sat)
+    K_S_0 = specific_reference_affinity(ρ_p, V_c, D_S)
+    r_c = (3*V_c/(4*pi)).^(1/3)
+    r_p = 1e-9
+    k1_s = zeros(size(ρ_p,1), size(ρ_p,2))
+    for i in 1:size(ρ_p,2)
+        k1_s[:,i] = @. V_S*ρ_p[:,i]*4*r_c[i]^2/(K_S_0[:,i]*r_p^2)
+    end
+    #k1_s  = @. V_S*ρ_p*4*r_c^2/(K_S_0*r_p^2)
+    r_m = @. r_c*(80.0*N_cell)^(1/3)
+    v_m = @. 4/3*pi*r_m^3
+    #
+    kapvsi = zeros(size(ρ_p,1), size(ρ_p,2))
+    for i in 1:size(ρ_p,2)
+        kapvsi[:,i] = @. (δ/(D_S*r_m[i]*(r_m[i]+δ)) + 1/(D_S*τ_w*ϕ_w*(r_m[i]+δ)+1.e-20))*v_m[i]/(4.0*pi)
+    end
+    #
+    K = zeros(size(ρ_p,1), size(ρ_p,2))
+    for i in 1:size(ρ_p, 2)
+        K[:,i] =  @. K_S_0[:,i]*(1 + (kapvsi[:,i])*k1_s[:,i]*N_cell[i]/(N_A*v_m[i]))
+    end
+    any(x->x==true, isnan.(K)) ? throw(DomainError("NaN in DEBJulia.ECA_kinetics!"))  : return K
+end
+
 
 function reynolds_number(u_c::Array{Float64,1}, l_c::Array{Float64,1}, ν_kin::Float64)
     # ν_kin = kinematic viscosity, u_c = swimming velocity, l_c = characteristic length
