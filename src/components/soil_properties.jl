@@ -38,14 +38,15 @@ function soil_affinity_properties(pct_sand::Float64, pct_clay::Float64, s_sat::F
     theta = s_sat*sat # phi_w
     epsi = sat-theta
     psi, dpsidvsm = cosby_psi(s_sat, psisat, sat, chb)
-    film = max(exp(-13.65-0.857*log(-psi*1e-6)), 1e-7)
+    #film = max(exp(-13.65-0.857*log(-psi*1e-6)), 1e-7)
+    film = exp(-13.65-0.857*log(-psi*1e-6))
     τ_g, τ_w = moldrup_tau(sat, epsi, theta, chb)
     return theta, τ_g, τ_w, film
 end
 
 function effective_diffusivity(molecular_weight::Array{Float64,1}, pct_sand::Float64, pct_clay::Float64, s_sat::Float64)
-    D_S = @. 4.36e-9*molecular_weight^(-0.386)
+    D_S = aqueous_diffusivity(molecular_weight)
     ϕ_w, τ_g, τ_w, δ  = soil_affinity_properties(pct_sand, pct_clay, s_sat)
     D_eff = D_S*τ_w*ϕ_w
-    return D_eff.*1e-9
+    return D_eff
 end
