@@ -1,4 +1,6 @@
 # DEBmicroTrait
+## Genome-informed, trait-based dynamic energy budget (DEB) modeling of microbes, with support for unsupervised learning and ML workflows to analyze emergent metabolic and ecological strategies.
+
 
 **DEBmicroTrait** is a genome-informed, trait-based dynamic energy budget (DEB) modeling package for microbial systems, implemented in Julia. The framework links genome-derived traits to microbial energy and resource acquisition, allocation, and growth, enabling metabolic trade-offs and ecological strategies to emerge from first principles under varying environmental conditions.
 
