@@ -1,12 +1,36 @@
 # DEBmicroTrait
 
-[![DOI](https://zenodo.org/badge/529673789.svg)](https://zenodo.org/badge/latestdoi/529673789)
+**DEBmicroTrait** is a genome-informed, trait-based dynamic energy budget (DEB) modeling package for microbial systems, implemented in Julia. The framework links genome-derived traits to microbial energy and resource acquisition, allocation, and growth, enabling metabolic trade-offs and ecological strategies to emerge from first principles under varying environmental conditions.
+
+DEBmicroTrait is designed to support **machine learning–enabled analysis of emergent microbial strategies**. Model outputs and genome-derived trait spaces can be analyzed using **unsupervised learning** to identify dominant metabolic and life-history strategies, cluster taxa based on variance in genome-informed traits, and map emergent behaviors across environmental gradients.
+
+# Key Features
+
+**Genome-informed trait integration**
+Uses genome-derived traits (via [microTrait](https://github.com/ukaraoz/microtrait), qSIP, iRep) to constrain growth, uptake kinetics, maintenance, enzyme production, and mortality.
+
+**Unsupervised learning of emergent strategies**
+Supports clustering, dimensionality reduction, and manifold learning to identify dominant metabolic and life-history strategies emerging from simulations.
+
+Genome-scale trait variance analysis
+Enables clustering of taxa based on variance and covariance in genome-derived trait distributions.
+
+Trait-based DEB framework
+Explicit representation of energy and resource allocation allows trade-offs to emerge rather than be imposed.
+
+Scalable reaction-network formulation
+SUPECA-based kinetics ensure scale invariance across complex substrate–consumer and enzyme-mediated reaction networks.
+
+Flexible experimental configurations
+Batch, chemostat, and time-dependent forcing scenarios for arbitrary numbers of substrates, taxa, and enzymes.
+
+Environmental coupling
+Optional integration of soil microscale processes and environmental controls, such as temperature, moisture, texture, and mineral matrix composition.
 
 
 
 **DEBmicroTrait** is a genome-informed trait-based dynamic energy budget modeling package developed for trait-based microbial modeling in Julia. The dynamic energy budget approach captures interacting strategies for energy and resource acquisition and allocation, letting the shape of trade-offs and trait variation at population or community level emerge in response to environmental conditions.
 
-<img src="/files/EESA22-0403.jpg" width="250">
 
  In the current version, **DEBmicroTrait** can be built in batch mode, chemostat mode, or with time-dependent substrate forcings for any number of substrates (polymers, monomers), microbes, and enzymes. The model structure is based on synthesizing unit equilibrium chemistry approximation kinetics ([SUPECA](https://gmd.copernicus.org/articles/10/3277/2017/)) which guarantees scale-invariance across an arbitrary number of complex substrate-consumer reactions. Representations of the soil mineral matrix and microscale-environment feedback on process rates (soil temperature, soil saturation and texture) can be added based on sample metadata availability.
 
