@@ -5,15 +5,19 @@ using JLD
 ########################################
 # I/O
 dir             = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
-df_isolates     = CSV.read(joinpath(dir, "files/input/isolates2traits.csv"), DataFrame, missingstring="N/A")
+df_mags     = CSV.read(joinpath(dir, "files/input/greenlon-H-mags2traits.csv"), DataFrame, missingstring="")
 ########################################
 
 ########################################
-Genome_size     = convert(Array{Float64,1}, df_isolates.Genome_size)
-V_cell          = DEBmicroTrait.genome_size_to_cell_volume(Genome_size)
-Min_gen_time    = df_isolates.Min_gen_time
+genome_bp = df_mags."bin length" .* 1e6                     # bp
+r_cell    = df_mags.spherical_equivalent_diameter ./ 2 .* 1e-6   # m
+V_from_radius = passmissing(DEBmicroTrait.cell_radius_to_cell_volume).(r_cell)
+V_from_genome = DEBmicroTrait.genome_size_to_cell_volume(genome_bp)
+V_cell = coalesce.(V_from_radius, V_from_genome)
+rrn_copies = DEBmicroTrait.genome_size_to_rRNA_copy_number(genome_bp)
+Min_gen_time    = df_mags.mingentime
 gmax            = log(2)./Min_gen_time
-Gram_stain      = convert(Array{String,1}, df_isolates.gram_stain)
+Gram_stain      = repeat(["-"], size(df_mags,1))
 ########################################
 
 ########################################
@@ -29,5 +33,5 @@ Bio_0           = 1e9*1e6*ρ_bulk*dry_mass./12.011
 
 ########################################
 # I/O
-save("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_turnover.jld", "gV0", γ_V_0, "gV1", γ_V_1)
+save("/Users/glmarschmann/.julia/dev/DEBmicroTrait.jl/files/output/mags_turnover.jld", "gV0", γ_V_0, "gV1", γ_V_1)
 ########################################

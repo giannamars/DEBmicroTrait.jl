@@ -22,3 +22,14 @@ CO2  = u[1+n_polymers+n_monomers+2*n_microbes+n_enzymes:n_polymers+n_monomers+2*
 @test size(V,1) == n_microbes
 @test size(X,1) == n_enzymes
 @test size(CO2,1) == n_microbes
+
+
+n_polymers = 1
+n_monomers = 1
+n_microbes = 1
+n_enzymes  = 1
+n_minerals = 0
+p_set      = Setup(n_polymers, n_monomers, n_microbes, n_enzymes, n_minerals)
+
+p = Params(p_set, nothing,nothing,nothing,nothing)
+P, D, E, V, X, CO2 = DEBmicroTrait.split_state_poly(ones(p_set.dim), p)

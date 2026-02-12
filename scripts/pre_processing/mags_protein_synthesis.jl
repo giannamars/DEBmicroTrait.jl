@@ -5,15 +5,18 @@ using JLD
 ########################################
 # I/O
 dir             = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
-df_isolates     = CSV.read(joinpath(dir, "files/input/isolates2traits.csv"), DataFrame, missingstring="N/A")
+df_mags     = CSV.read(joinpath(dir, "files/input/greenlon-H-mags2traits.csv"), DataFrame, missingstring="")
 ########################################
 
 ########################################
-Genome_size     = convert(Array{Float64,1}, df_isolates.Genome_size)
-V_cell          = DEBmicroTrait.genome_size_to_cell_volume(Genome_size)
-rrn_copies      = convert(Array{Float64,1}, df_isolates.rRNA_genes)
-Min_gen_time    = df_isolates.Min_gen_time
-Gram_stain      = convert(Array{String,1}, df_isolates.gram_stain)
+genome_bp = df_mags."bin length" .* 1e6                    # bp
+r_cell    = df_mags.spherical_equivalent_diameter ./ 2 .* 1e-6   # m
+V_from_radius = passmissing(DEBmicroTrait.cell_radius_to_cell_volume).(r_cell)
+V_from_genome = DEBmicroTrait.genome_size_to_cell_volume(genome_bp)
+V_cell = coalesce.(V_from_radius, V_from_genome)
+rrn_copies = DEBmicroTrait.genome_size_to_rRNA_copy_number(genome_bp)
+Min_gen_time    = df_mags.mingentime
+Gram_stain      = repeat(["-"], size(df_mags,1))
 ########################################
 
 ########################################
@@ -29,5 +32,5 @@ y_EV            = DEBmicroTrait.relative_translation_efficiency_regression(rrn_c
 
 ########################################
 # I/O
-save("/Users/glmarschmann/.julia/dev/DEBmicroTrait/files/output/isolates_protein_synthesis.jld", "kE", k_E, "yEV", y_EV, "mingt", Min_gen_time)
+save("/Users/glmarschmann/.julia/dev/DEBmicroTrait.jl/files/output/mags_protein_synthesis.jld", "kE", k_E, "yEV", y_EV, "mingt", Min_gen_time)
 ########################################

@@ -1,13 +1,14 @@
 abstract type AbstractMetabolism end
 abstract type AbstractMetabolismC <: AbstractMetabolism end
 
-struct MetabolismC{KE,YEV,KM,YEM,AX,YEX,MGT} <: AbstractMetabolismC
+struct MetabolismC{KE,YEV,KM,YEM,AX,YEX,FAX,MGT} <: AbstractMetabolismC
     k_E::KE     # Reserve export rate [1/h]
     y_EV::YEV   # Yield of structure on reserve [mol/mol]
     k_M::KM     # Specific maintenance rate [1/h]
     y_EM::YEM   # Maintenance yield on reserve vs structure [mol/mol]
     α_X::AX     # Fraction of growth flux allocated to enzyme production [-]
     y_EX::YEX   # Yield on enzyme production [mol/mol]
+    f_αX::FAX   # Fractional allocation to different enzymes [-]
     min_gt::MGT # Minimum generation time [h]
 end
 
@@ -49,5 +50,5 @@ growth_production!(r, p::MetabolismC, E::Vector{Float64}, V::Vector{Float64}) = 
 end
 
 enzyme_production!(x, p::MetabolismC, V::Vector{Float64}) = begin
-    J_EX = sum(x.*V, dims=1)
+    J_EX = f_αX(p).*sum(x.*V, dims=1)
 end

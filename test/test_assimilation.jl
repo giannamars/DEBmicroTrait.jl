@@ -7,9 +7,8 @@ N_SB         = rand(n_substrates, n_consumers)
 K_D          = rand(n_substrates, n_consumers)
 y_DE         = rand(n_substrates, n_consumers)
 N_C          = rand(n_substrates)
-N_X          = rand(n_substrates)
 
-p            = AssimilationC(N_SB, K_D, y_DE, N_C, N_X)
+p            = AssimilationC(N_SB, K_D, y_DE, N_C)
 
 D            = rand(n_substrates)
 V            = rand(n_consumers)

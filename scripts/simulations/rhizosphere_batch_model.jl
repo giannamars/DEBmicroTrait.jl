@@ -1,8 +1,11 @@
 using DEBmicroTrait
 using CSV, DataFrames, Statistics
-using JLD
+using JLD, JLD2
 using Plots
+plotlyjs()
 using DifferentialEquations
+
+
 
 dir                     = "DEBSCRIPTS" in keys(ENV) ? ENV["DEBSCRIPTS"] : pwd()
 df_isolates             = CSV.read(joinpath(dir, "files/input/isolates2traits.csv"), DataFrame, missingstring="N/A")
@@ -15,60 +18,40 @@ protein_synthesis       = load(joinpath(dir, "files/output/isolates_protein_synt
 turnover                = load(joinpath(dir, "files/output/isolates_turnover.jld"))
 initb                   = load(joinpath(dir, "files/output/isolates_batch_init.jld"))
 
-df = DataFrame()
-KD = zeros(39,83)
-for i in 1:83
-    KD[:,i] = assimilation["KD"][i,:]
-end
-df.KD = vec(KD)
-Vmax = zeros(39,83)
-for i in 1:83
-    Vmax[:,i] = assimilation["NSB"][i,:]
-end
-df.Vmax = vec(Vmax)
-ontology = Array{String}(undef,39,83)
-for i in 1:83
-     ontology[:,i] .= df_metabolites.Ontology[i]
- end
-df.ontology = vec(ontology)
-df.response = repeat(df_isolates.Rhizosphere_response, 83)
-CSV.write(joinpath(dir, "files/output/isolates_assimilation.csv"), df)
-
-
 condition(u,t,integrator) = u[1] - 1e-5
 affect!(integrator)       = terminate!(integrator)
 cb                        = ContinuousCallback(condition,affect!)
 
-BGE_tseries       = zeros(39, 83, 500)
-BR_tseries        = zeros(39, 83, 500)
-BP_tseries        = zeros(39, 83, 500)
-r_tseries         = zeros(39, 83, 500)
-x_tseries         = zeros(39, 83, 500)
-rG_CO2_tseries    = zeros(39, 83, 500)
-rM_CO2_tseries    = zeros(39, 83, 500)
-rX_CO2_tseries    = zeros(39, 83, 500)
-J_EX_tseries      = zeros(39, 83, 500)
-J_DE_tseries      = zeros(39, 83, 500)
-J_DE_CO2_tseries  = zeros(39, 83, 500)
-J_D_tseries       = zeros(39, 83, 500)
-J_ED_tseries      = zeros(39, 83, 500)
-J_V_tseries       = zeros(39, 83, 500)
-J_E_tseries       = zeros(39, 83, 500)
-t_tseries         = zeros(39, 83, 500)
-D_tseries         = zeros(39, 83, 500)
-E_tseries         = zeros(39, 83, 500)
-V_tseries         = zeros(39, 83, 500)
-X_tseries         = zeros(39, 83, 500)
-CO2_tseries       = zeros(39, 83, 500)
-N_cells_tseries   = zeros(39, 83, 500)
-maintenance_tseries    = zeros(39, 83, 500)
+BGE_tseries       = zeros(39, 84, 500)
+BR_tseries        = zeros(39, 84, 500)
+BP_tseries        = zeros(39, 84, 500)
+r_tseries         = zeros(39, 84, 500)
+x_tseries         = zeros(39, 84, 500)
+rG_CO2_tseries    = zeros(39, 84, 500)
+rM_CO2_tseries    = zeros(39, 84, 500)
+rX_CO2_tseries    = zeros(39, 84, 500)
+J_EX_tseries      = zeros(39, 84, 500)
+J_DE_tseries      = zeros(39, 84, 500)
+J_DE_CO2_tseries  = zeros(39, 84, 500)
+J_D_tseries       = zeros(39, 84, 500)
+J_ED_tseries      = zeros(39, 84, 500)
+J_V_tseries       = zeros(39, 84, 500)
+J_E_tseries       = zeros(39, 84, 500)
+t_tseries         = zeros(39, 84, 500)
+D_tseries         = zeros(39, 84, 500)
+E_tseries         = zeros(39, 84, 500)
+V_tseries         = zeros(39, 84, 500)
+X_tseries         = zeros(39, 84, 500)
+CO2_tseries       = zeros(39, 84, 500)
+N_cells_tseries   = zeros(39, 84, 500)
+maintenance_tseries    = zeros(39, 84, 500)
 
 for i in 1:39
-    for j in 1:83
+    for j in 1:84
         id_isolate = i
         id_monomer = j
 
-        p                 = DEBmicroTrait.init_batch_model(id_isolate, id_monomer, assimilation, enzymes, maintenance, protein_synthesis, turnover)
+        p                 = DEBmicroTrait.init_batch_model(id_isolate, id_monomer, 0, assimilation, enzymes, maintenance, protein_synthesis, turnover)
         n_polymers        = p.setup_pars.n_polymers
         n_monomers        = p.setup_pars.n_monomers
         n_microbes        = p.setup_pars.n_microbes
@@ -147,16 +130,222 @@ for i in 1:39
     end
 end
 
+
+# Define compound and microbe IDs
+compound_ids = Dict(:glucose => 29, :ethanol => 84)
+microbe_ids = Dict("HA54" => 7)
+
+
+# Helper function to get flux components
+function co2_and_energy_components(microbe_id, compound_id)
+  
+    rG = rG_CO2_tseries[microbe_id, compound_id, :]
+    rM = rM_CO2_tseries[microbe_id, compound_id, :]
+    rX = rX_CO2_tseries[microbe_id, compound_id, :]
+    rA = J_DE_CO2_tseries[microbe_id, compound_id, :]
+
+    elementstring = String(df_metabolites.Formula[compound_id])
+    stoich = DEBmicroTrait.extract_composition(elementstring)
+    γ_D  = (4*stoich[1] + stoich[2] - 3*stoich[3] - 2*stoich[4] + 6*stoich[5] +5*stoich[6]) / stoich[1]
+
+    y_EV = protein_synthesis["yEV"][microbe_id]
+    y_EX = y_EV
+
+    dH_G = rG .* (1 - 1/y_EV)^(-1) .* 20.3
+    dH_M = rM .* 20.3
+    dH_X = rX .* (1 - 1/y_EX)^(-1) .* 20.3
+    dH_A = rA .* γ_D .* 117.25
+
+    Dt = D_tseries[microbe_id, compound_id, :]
+    Et = E_tseries[microbe_id, compound_id, :]
+    Vt = V_tseries[microbe_id, compound_id, :]
+    Ncells = N_cells_tseries[microbe_id, compound_id, :]
+
+    return rG, rM, rX, rA, dH_G, dH_M, dH_X, dH_A, Et, Vt, Ncells, Dt
+end
+
+compound_id = 84
+elementstring = String(df_metabolites.Formula[compound_id])
+stoich = DEBmicroTrait.extract_composition(elementstring)
+γ_D  = (4*stoich[1] + stoich[2] - 3*stoich[3] - 2*stoich[4] + 6*stoich[5] +5*stoich[6]) / stoich[1]
+
+# Prepare dictionary to hold results
+results = Dict()
+
+for (microbe_label, microbe_id) in microbe_ids
+    for (compound_label, compound_id) in compound_ids
+        rG, rM, rX, rA, dH_G, dH_M, dH_X, dH_A, Et, Vt, Ncells, Dt = co2_and_energy_components(microbe_id, compound_id)
+
+        key = "$(microbe_label)_$(compound_label)"
+        results[key] = Dict(
+            "rG" => rG,
+            "rM" => rM,
+            "rX" => rX,
+            "rA" => rA,
+            "dH_G" => dH_G,
+            "dH_M" => dH_M,
+            "dH_X" => dH_X,
+            "dH_A" => dH_A,
+            "Et" => Et,
+            "Vt" => Vt,
+            "Ncells" => Ncells,
+            "Dt" => Dt
+        )
+    end
+end
+
+# Save to JLD2 file
+JLD2.@save "co2_energy_outputs_voc.jld2" results
+
+
+using HDF5
+
+# Open file to write
+h5open("co2_energy_outputs_voc.h5", "w") do file
+    for (microbe_label, microbe_id) in microbe_ids
+        for (compound_label, compound_id) in compound_ids
+            rG, rM, rX, rA, dH_G, dH_M, dH_X, dH_A, Et, Vt, Ncells, Dt = co2_and_energy_components(microbe_id, compound_id)
+
+            key = "$(microbe_label)_$(compound_label)"
+
+            g = create_group(file, key)  # Create a group for each microbe-compound pair
+
+            g["rG"] = rG
+            g["rM"] = rM
+            g["rX"] = rX
+            g["rA"] = rA
+            g["dH_G"] = dH_G
+            g["dH_M"] = dH_M
+            g["dH_X"] = dH_X
+            g["dH_A"] = dH_A
+            g["Et"] = Et
+            g["Vt"] = Vt
+            g["Ncells"] = Ncells
+            g["Dt"] = Dt
+        end
+    end
+end
+
+
+
+
+# Time range
+time = 1:100
+
+# Prepare plots
+plot_grid = []
+
+for (microbe_label, microbe_id) in microbe_ids
+    for (compound_label, compound_id) in compound_ids
+        rG, rM, rX, rA, dH_G, dH_M, dH_X, dH_A = co2_and_energy_components(microbe_id, compound_id)
+
+        #r1 = rG[1:100]
+        #r2 = @. rG + rM
+        #r3 = @. rG + rM + rX
+        r4 = @. rG + rM + rX + rA
+
+        #p = plot(time, r4[1:100], fillrange=r3[1:100], label="rA", c=:purple)
+        #plot!(p, time, r3[1:100], fillrange=r2[1:100], label="rX", c=:green)
+        #plot!(p, time, r2[1:100], fillrange=r1[1:100], label="rM", c=:orange)
+        #plot!(p, time, r1[1:100], fillrange=0,         label="rG", c=:blue)
+        
+
+        dH_all = @. dH_G + dH_A + dH_M + dH_X
+
+        CR = @. dH_all / r4
+
+        p = plot(time, CR[1:100])
+        #plot!(p, time, cumsum(dH_A[1:100]*1000/(5e5)))
+        #plot!(p, time, cumsum(dH_M[1:100]*1000/(5e5)))
+        #plot!(p, time, cumsum(dH_X[1:100]*1000/(5e5)))
+        #plot!(p, time, cumsum(dH_all[1:100]*1000/(5e5)))
+
+
+        #title!(p, "Microbe $microbe_label – $(Symbol(compound_label))")
+        #xlabel!(p, "Time")
+        #ylabel!(p, "CO₂ Flux")
+        push!(plot_grid, p)
+    end
+end
+
+# Display as 2x3 grid
+plot(plot_grid..., layout=(2, 3), size=(1000, 600))
+
+# Prepare plots
+plot_grid = []
+
+for (microbe_label, microbe_id) in microbe_ids
+    for (compound_label, compound_id) in compound_ids
+        rG, rM, rX, rA = co2_components(microbe_id, compound_id)
+
+        # Cumulative sum
+        cum_rG = cumsum(rG[time])
+        cum_rM = cumsum(rM[time])
+        cum_rX = cumsum(rX[time])
+        cum_rA = cumsum(rA[time])
+
+        # Cumulative stacks
+        r1 = cum_rG
+        r2 = r1 .+ cum_rM
+        r3 = r2 .+ cum_rX
+        r4 = r3 .+ cum_rA
+
+        p = plot(time, r4, fillrange=r3, label="rA", c=:purple)
+        plot!(p, time, r3, fillrange=r2, label="rX", c=:green)
+        plot!(p, time, r2, fillrange=r1, label="rM", c=:orange)
+        plot!(p, time, r1, fillrange=0,   label="rG", c=:blue)
+
+        title!(p, "Microbe $microbe_label – $(Symbol(compound_label))")
+        xlabel!(p, "Time")
+        ylabel!(p, "Cumulative CO₂ Flux")
+        push!(plot_grid, p)
+    end
+end
+
+# Display as 2x3 grid
+plot(plot_grid..., layout=(2, 3), size=(1000, 600), legend=:bottomright)
+
+
 id_sucrose = 21
 id_nicotinic = 52
 id_IAA = 33
 id_tryptophan = 76
 
+id_HA54 = 7
+
 # Need to multiply by biomass
+rG_CO2_sucrose = rG_CO2_tseries[id_HA54, id_sucrose, :]
+rM_CO2_sucrose = rM_CO2_tseries[id_HA54, id_sucrose, :]
+rX_CO2_sucrose = rX_CO2_tseries[id_HA54, id_sucrose, :]
+rA_CO2_sucrose = J_DE_CO2_tseries[id_HA54, id_sucrose, :]
+
+CO2_sucrose = @. rG_CO2_sucrose + rM_CO2_sucrose + rX_CO2_sucrose + rA_CO2_sucrose
+plot(CO2_sucrose[1:100])
+
+rG_CO2_nicotinic = rG_CO2_tseries[id_HA54, id_nicotinic, :]
+rM_CO2_nicotinic = rM_CO2_tseries[id_HA54, id_nicotinic, :]
+rX_CO2_nicotinic = rX_CO2_tseries[id_HA54, id_nicotinic, :]
+rA_CO2_nicotinic = J_DE_CO2_tseries[id_HA54, id_nicotinic, :]
+
+rG_CO2_IAA = rG_CO2_tseries[id_HA54, id_IAA, :]
+rM_CO2_IAA = rM_CO2_tseries[id_HA54, id_IAA, :]
+rX_CO2_IAA = rX_CO2_tseries[id_HA54, id_IAA, :]
+rA_CO2_IAA = J_DE_CO2_tseries[id_HA54, id_IAA, :]
+
+
+CO2_sucrose = @. rG_CO2_sucrose + rM_CO2_sucrose + rX_CO2_sucrose + rA_CO2_sucrose
+CO2_nicotinic = @. rG_CO2_nicotinic + rM_CO2_nicotinic + rX_CO2_nicotinic + rA_CO2_nicotinic
+CO2_IAA = @. rG_CO2_IAA + rM_CO2_IAA + rX_CO2_IAA + rA_CO2_IAA
+
+plot(CO2_sucrose[1:100])
+plot!(CO2_nicotinic[1:100])
+plot!(CO2_IAA[1:100])
+
+
 rG_CO2_sucrose = sum(rG_CO2_tseries, dims=1)[1,id_sucrose,:]
-rG_CO2_nicotinic = sum(rG_CO2_tseries, dims=1)[1,id_nicotinic,:]
-rG_CO2_IAA = sum(rG_CO2_tseries, dims=1)[1,id_IAA,:]
-rG_CO2_tryptophan = sum(rG_CO2_tseries, dims=1)[1,id_tryptophan,:]
+rG_CO2_nicotinic = sum(rG_CO2_tseries, dims=1)[id_HA54,id_nicotinic,:]
+rG_CO2_IAA = sum(rG_CO2_tseries, dims=1)[id_HA54,id_IAA,:]
+rG_CO2_tryptophan = sum(rG_CO2_tseries, dims=1)[id_HA54,id_tryptophan,:]
 
 rM_CO2_sucrose = sum(rM_CO2_tseries, dims=1)[1,id_sucrose,:]
 rM_CO2_nicotinic = sum(rM_CO2_tseries, dims=1)[1,id_nicotinic,:]
@@ -186,9 +375,9 @@ plot!(CO2_tryptophan[1:100])
 plot(sum(J_DE_CO2_tseries, dims=1)[1,33,1:100])
 
 plot(rG_CO2_tseries[1,:,1:100])
-plot!(rG_CO2_tseries[1,52,1:100])
+plot(rG_CO2_tseries[1,52,1:100])
 plot(rG_CO2_tseries[5,33,1:100])
-plot!(rG_CO2_tseries[1,76,1:100])
+plot(rG_CO2_tseries[1,76,1:100])
 
 
 r_median        = zeros(39,83)

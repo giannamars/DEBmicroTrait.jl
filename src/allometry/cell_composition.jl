@@ -12,6 +12,10 @@ function surface_area_volume_ratio(V_c::Vector{Float64})
     SAV = @. A_c/V_c
 end
 
+function cell_radius_to_cell_volume(r_c)
+    V_c = @. 4/3*π*r_c^3
+end
+
 function cell_volume_to_genome_size(V_c::Vector{Float64})
     # Kempes et al. (2016), Eq. 8
     D_0 = 3e-17

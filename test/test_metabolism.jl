@@ -9,8 +9,9 @@ y_EM    = 1.0*ones(1)
 α_X     = 0.0*ones(1)
 y_EX    = 1.0*ones(1)
 mingt   = 1.0*ones(1)
+f_ax    = 1.0*ones(1)
 
-p       = MetabolismC(k_E, y_EV, k_M, y_EM, α_X, y_EX, mingt)
+p       = MetabolismC(k_E, y_EV, k_M, y_EM, α_X, y_EX, f_ax, mingt)
 E       = 1.0*ones(1)
 V       = 1.0*ones(1)
 
@@ -28,13 +29,17 @@ k_E     = 0.2*ones(n_consumers)
 y_EV    = 1.0*ones(n_consumers)
 k_M     = 0.1*ones(n_consumers)
 y_EM    = 1.0*ones(n_consumers)
-α_X     = 0.0*ones(n_consumers)
+α_X     = 0.1*ones(n_consumers)
 y_EX    = 1.0*ones(n_consumers)
 mingt   = 1.0*ones(n_consumers)
+f_ax    = 1.0*ones(n_consumers)
 
-p       = MetabolismC(k_E, y_EV, k_M, y_EM, α_X, y_EX, mingt)
+p       = MetabolismC(k_E, y_EV, k_M, y_EM, α_X, y_EX, f_ax,mingt)
 E       = 1.0*ones(n_consumers)
 V       = 1.0*ones(n_consumers)
 
 r       = DEBmicroTrait.growth!(0.0*ones(n_consumers), p, E, V)
 @test size(r,1) == n_consumers
+
+x, rG_CO2, rM_CO2, rX_CO2 = DEBmicroTrait.growth_production!(r, p, E, V)
+J_EX       = DEBmicroTrait.enzyme_production!(x, p, V)

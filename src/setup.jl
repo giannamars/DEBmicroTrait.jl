@@ -45,3 +45,18 @@ function split_state_batch(u::AbstractVector{<:Real}, p::AbstractParams)
     CO2  = u[1+n_polymers+n_monomers+2*n_microbes+n_enzymes:n_polymers+n_monomers+2*n_microbes+n_enzymes+n_microbes]
     return D, E, V, X, CO2
 end
+
+function split_state_poly(u::AbstractVector{<:Real}, p::AbstractParams)
+    n_polymers = p.setup_pars.n_polymers
+    n_monomers = p.setup_pars.n_monomers
+    n_microbes = p.setup_pars.n_microbes
+    n_enzymes  = p.setup_pars.n_enzymes
+ 
+    P    = u[1:n_polymers]
+    D    = u[1+n_polymers:n_polymers+n_monomers]
+    E    = u[1+n_polymers+n_monomers:n_polymers+n_monomers+n_microbes]
+    V    = u[1+n_polymers+n_monomers+n_microbes:n_polymers+n_monomers+2*n_microbes]
+    X    = u[1+n_polymers+n_monomers+2*n_microbes:n_polymers+n_monomers+2*n_microbes+n_enzymes]
+    CO2  = u[1+n_polymers+n_monomers+2*n_microbes+n_enzymes:n_polymers+n_monomers+2*n_microbes+n_enzymes+n_microbes]
+    return P, D, E, V, X, CO2
+end
