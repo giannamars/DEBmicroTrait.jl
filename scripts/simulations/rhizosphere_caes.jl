@@ -103,7 +103,7 @@ for i in 1:size(r_tseries,1)
         J_DE_median[i,]  = NaN
     end
 end
-
+ 
 
 df_mags.r_median            = r_median
 df_mags.relabund_median     = Bio_median./maximum(Bio_median)
