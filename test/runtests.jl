@@ -1,5 +1,6 @@
 using Test
 using DEBmicroTrait
+using LinearAlgebra
 
 if Base.find_package("OrdinaryDiffEq") !== nothing
     @eval using OrdinaryDiffEq
@@ -25,6 +26,17 @@ end
     @test encode_traits(encoder, traits) == [7.0, 7.0]
     @test unitize([5.0], 0.0, 10.0) == [0.5]
     @test devectorize([0.5], 0.0, 10.0) == [5.0]
+end
+
+@testset "trait parameters" begin
+    encoder = TraitEncoder(Matrix{Float64}(I, 3, 3), zeros(3), identity; parameter_names = (:k_uptake, :yield, :k_decay))
+    traits = [0.5, 0.4, 0.1]
+    named_parameters = trait_parameters(encoder, traits)
+
+    @test named_parameters.k_uptake == 0.5
+    @test named_parameters.yield == 0.4
+    @test named_parameters.k_decay == 0.1
+    @test TinyTrainingParameters(named_parameters) == TinyTrainingParameters(0.5, 0.4, 0.1)
 end
 
 @testset "mass balance" begin

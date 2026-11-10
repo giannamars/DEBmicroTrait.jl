@@ -4,6 +4,8 @@ struct TinyTrainingParameters{K,Y,D}
     k_decay::D
 end
 
+TinyTrainingParameters(values::NamedTuple) = TinyTrainingParameters(values.k_uptake, values.yield, values.k_decay)
+
 struct TinyTrainingProblem{L,U,T,Tg,P,S,Alg,SA}
     layout::L
     u0::U
@@ -32,6 +34,8 @@ end
 parameter_vector(parameters::TinyTrainingParameters) = [parameters.k_uptake, parameters.yield, parameters.k_decay]
 
 tiny_parameters(parameters::AbstractVector) = TinyTrainingParameters(parameters[1], parameters[2], parameters[3])
+tiny_parameters(parameters::NamedTuple) = TinyTrainingParameters(parameters)
+tiny_parameters(parameters::TinyTrainingParameters) = parameters
 
 function tiny_model(problem::TinyTrainingProblem, parameters::TinyTrainingParameters)
     build_model(problem.layout, build_parameters((k_uptake = parameters.k_uptake, yield = parameters.yield, k_decay = parameters.k_decay)))
