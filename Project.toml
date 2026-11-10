@@ -4,4 +4,4 @@ authors = ["Gianna Marschmann"]
 version = "0.1.0"
 
 [compat]
-julia = "1.8"
+julia = "1.13"
