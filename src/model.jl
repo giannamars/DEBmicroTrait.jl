@@ -21,6 +21,8 @@ function rhs!(du, u, model::SoilModel, t)
 end
 
 observables(u, model::SoilModel) = copy(u)
+observables(u, model::HysomiModel) = copy(u)
 
 mass_balance(u, model::SoilModel) = sum(u)
+mass_balance(u, model::HysomiModel) = hysomi_mass_balance(u, model)
 

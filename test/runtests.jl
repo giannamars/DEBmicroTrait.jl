@@ -196,3 +196,42 @@ end
         @test true
     end
 end
+
+@testset "hysomi core" begin
+    layout = hysomi_state_layout()
+    @test layout.dim == 6
+    @test state_range(layout, :CO2) == 6:6
+
+    biopar = (
+        mu = 0.1,
+        K_L = 10.0,
+        Y_mu = 0.4,
+        S_tr = 0.2,
+        r_react = 0.5,
+        r_deact = 0.3,
+        K_C_H = 0.7,
+        vmax = 0.2,
+        fm = 0.4,
+        Y_m = 0.5,
+        m_max = 0.6,
+        beta = 0.2,
+        tau = 0.3,
+    )
+    soilpar = (
+        k_a = 0.1,
+        k_d = 0.01,
+        C_S_max = 1.0,
+        I_C_L = 0.0,
+        I_C_H = 0.0,
+    )
+    model = build_hysomi_model(layout, build_hysomi_parameters(biopar, soilpar))
+    u = [0.1, 0.2, 1.0, 10.0, 0.5, 0.0]
+    du = zeros(6)
+
+    hysomi_rhs!(du, u, parameter_vector(model), 0.0)
+
+    @test length(du) == 6
+    @test all(isfinite, du)
+    @test isapprox(sum(du), 0.0; atol = 1e-12)
+    @test isapprox(hysomi_mass_balance(u, model), sum(u))
+end

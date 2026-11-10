@@ -1,4 +1,4 @@
-function loss(prediction, target, model::SoilModel; mass_penalty = 0.0, reference_mass = nothing)
+function loss(prediction, target, model; mass_penalty = 0.0, reference_mass = nothing)
     data_term = sum(abs2, prediction .- target)
 
     if mass_penalty == 0.0

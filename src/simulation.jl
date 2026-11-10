@@ -29,13 +29,13 @@ end
 
 simulate(args...; kwargs...) = throw(ArgumentError("pass a SciML solve function to simulate"))
 
-trajectory_loss(model::SoilModel, u0::AbstractVector, tspan::Tuple{<:Real,<:Real}, target; kwargs...) = begin
+trajectory_loss(model, u0::AbstractVector, tspan::Tuple{<:Real,<:Real}, target; kwargs...) = begin
     solution = simulate(model, u0, tspan; kwargs...)
     prediction = solution.u[end]
     return loss(prediction, target, model)
 end
 
-function gradient_smoke_test(model::SoilModel, u0::AbstractVector, tspan::Tuple{<:Real,<:Real}, target;
+function gradient_smoke_test(model, u0::AbstractVector, tspan::Tuple{<:Real,<:Real}, target;
     gradient_function = nothing,
     loss_function = trajectory_loss,
     kwargs...,
