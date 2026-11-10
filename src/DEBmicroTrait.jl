@@ -1,14 +1,15 @@
 module DEBmicroTrait
 
 include("core.jl")
-include("model.jl")
 include("traits.jl")
+include("model.jl")
 include("loss.jl")
 include("train.jl")
 
-export StateLayout, Parameters, ModelConfig
+export StateLayout, Parameters, SoilModel, ModelConfig
 export build_state_layout, build_parameters, build_model
-export rhs!, observables, loss
-export encode_traits, training_step!
+export state_range, parameter, rhs!, observables, mass_balance
+export TraitEncoder, unitize, devectorize, encode_traits, softplus
+export loss, training_step!
 
 end

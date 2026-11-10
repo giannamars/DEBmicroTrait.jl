@@ -1,39 +1,39 @@
 using Test
 using DEBmicroTrait
 
-@testset "core" begin
-    layout = build_state_layout([:P, :D, :E], [2, 3, 1])
-    @test layout.dim == 6
-    params = build_parameters((k = 1.0,))
-    model = build_model(layout, params)
-    @test model.state_layout.dim == 6
-    @test model.parameters.values.k == 1.0
+@testset "layout" begin
+    layout = build_state_layout([:substrate, :biomass, :mineral], [1, 1, 1])
+    @test layout.dim == 3
+    @test state_range(layout, :biomass) == 2:2
 end
 
-@testset "model" begin
-    layout = build_state_layout([:x], [2])
-    model = build_model(layout, build_parameters((k = 1.0,)))
-    u = [1.0, 2.0]
-    du = similar(u)
+@testset "trait encoding" begin
+    encoder = TraitEncoder([2.0 0.0; 0.0 2.0], [1.0, -1.0], identity)
+    traits = [3.0, 4.0]
+    @test encode_traits(encoder, traits) == [7.0, 7.0]
+    @test unitize([5.0], 0.0, 10.0) == [0.5]
+    @test devectorize([0.5], 0.0, 10.0) == [5.0]
+end
+
+@testset "mass balance" begin
+    layout = build_state_layout([:substrate, :biomass, :mineral], [1, 1, 1])
+    model = build_model(layout, build_parameters((k_uptake = 0.5, yield = 0.4, k_decay = 0.1)))
+    u = [1.0, 0.2, 0.0]
+    du = zeros(3)
+
     rhs!(du, u, model, 0.0)
-    @test du == [-1.0, -2.0]
-    @test observables(u, model) == u
-end
 
-@testset "traits" begin
-    @test encode_traits([1.0, 2.0], [3.0]) == [4.0, 5.0]
+    @test du[1] < 0
+    @test isapprox(sum(du), 0.0; atol = 1e-12)
+    @test isapprox(mass_balance(u, model), 1.2)
 end
 
 @testset "loss" begin
-    layout = build_state_layout([:x], [1])
-    model = build_model(layout, build_parameters((k = 1.0,)))
-    @test loss([2.0, 3.0], [1.0, 1.0], model) == 5.0
-end
+    layout = build_state_layout([:substrate, :biomass, :mineral], [1, 1, 1])
+    model = build_model(layout, build_parameters((k_uptake = 0.5, yield = 0.4, k_decay = 0.1)))
+    prediction = [1.0, 2.0, 3.0]
+    target = [1.0, 1.0, 1.0]
 
-@testset "train" begin
-    layout = build_state_layout([:x], [1])
-    model = build_model(layout, build_parameters((k = 1.0,)))
-    returned_model, batch = training_step!(model, (1, 2, 3))
-    @test returned_model === model
-    @test batch == (1, 2, 3)
+    @test loss(prediction, target, model) == 5.0
+    @test training_step!(model, (prediction, target)) == 5.0
 end
