@@ -52,6 +52,37 @@ end
     @test encoded == trait_parameters(encoder, traits)
 end
 
+@testset "trait regularization hooks" begin
+    encoder = TraitEncoder(
+        (
+            [0.8 0.1 -0.2; -0.3 0.9 0.4; 0.2 0.5 0.7; 0.6 -0.4 0.3],
+            [0.7 -0.1 0.2 0.5; -0.2 0.6 0.1 -0.3; 0.3 0.2 -0.5 0.4],
+        ),
+        (
+            [0.1, 0.0, -0.1, 0.05],
+            [-0.2, 0.05, -0.3],
+        ),
+        relu;
+        output_activation = sigmoid,
+        parameter_names = (:k_uptake, :yield, :k_decay),
+        parameter_ranges = [0.05 0.8; 0.1 0.9; 0.01 0.35],
+        dropout_probability = 0.25,
+        batchnorm_statistics = (
+            (mean = zeros(4), variance = ones(4)),
+        ),
+    )
+    traits = [0.5, 0.4, 0.1]
+
+    encoded = trait_vector(encoder, traits)
+    @test length(encoded) == 3
+    @test all(isfinite, encoded)
+    @test trait_vector(encoder, traits; training = false) == encoded
+
+    trained = trait_vector(encoder, traits; training = true)
+    @test length(trained) == 3
+    @test all(isfinite, trained)
+end
+
 @testset "trait parameters" begin
     encoder = TraitEncoder(Matrix{Float64}(I, 3, 3), zeros(3), identity; parameter_names = (:k_uptake, :yield, :k_decay))
     traits = [0.5, 0.4, 0.1]

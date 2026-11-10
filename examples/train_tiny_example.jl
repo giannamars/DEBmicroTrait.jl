@@ -19,6 +19,10 @@ const TINY_TRAINING_ENCODER = TraitEncoder(
     output_activation = sigmoid,
     parameter_names = (:k_uptake, :yield, :k_decay),
     parameter_ranges = [0.05 0.8; 0.1 0.9; 0.01 0.35],
+    dropout_probability = 0.1,
+    batchnorm_statistics = (
+        (mean = zeros(4), variance = ones(4), epsilon = 1e-5),
+    ),
 )
 const TINY_TRAINING_TRAITS = [0.5, 0.4, 0.1]
 
