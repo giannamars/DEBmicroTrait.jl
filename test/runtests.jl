@@ -28,6 +28,30 @@ end
     @test devectorize([0.5], 0.0, 10.0) == [5.0]
 end
 
+@testset "trait mlp encoding" begin
+    encoder = TraitEncoder(
+        (
+            [0.8 0.1 -0.2; -0.3 0.9 0.4; 0.2 0.5 0.7; 0.6 -0.4 0.3],
+            [0.7 -0.1 0.2 0.5; -0.2 0.6 0.1 -0.3; 0.3 0.2 -0.5 0.4],
+        ),
+        (
+            [0.1, 0.0, -0.1, 0.05],
+            [-0.2, 0.05, -0.3],
+        ),
+        relu;
+        output_activation = sigmoid,
+        parameter_names = (:k_uptake, :yield, :k_decay),
+        parameter_ranges = [0.05 0.8; 0.1 0.9; 0.01 0.35],
+    )
+    traits = [0.5, 0.4, 0.1]
+    encoded = trait_parameters(encoder, traits)
+
+    @test keys(encoded) == (:k_uptake, :yield, :k_decay)
+    @test all(>=(0.01), values(encoded))
+    @test all(<=(0.9), values(encoded))
+    @test encoded == trait_parameters(encoder, traits)
+end
+
 @testset "trait parameters" begin
     encoder = TraitEncoder(Matrix{Float64}(I, 3, 3), zeros(3), identity; parameter_names = (:k_uptake, :yield, :k_decay))
     traits = [0.5, 0.4, 0.1]
@@ -122,15 +146,18 @@ end
     if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
         include(joinpath(@__DIR__, "..", "examples", "train_tiny_example.jl"))
         result = run_tiny_training_example(
-            initial_parameters = TINY_TRAINING_INITIAL_PARAMETERS,
+            initial_traits = TINY_TRAINING_TRAITS,
+            trait_encoder = TINY_TRAINING_ENCODER,
             backend = TINY_TRAINING_BACKEND,
             alg = TINY_TRAINING_ALG,
             sensealg = TINY_TRAINING_SENSEALG,
         )
+        expected_parameters = TinyTrainingParameters(trait_parameters(TINY_TRAINING_ENCODER, TINY_TRAINING_TRAITS))
 
         @test isfinite(result.value)
         @test length(result.gradient) == 3
         @test result.updated_parameters isa TinyTrainingParameters
+        @test result.initial_parameters == expected_parameters
         @test all(isfinite, result.gradient)
         @test all(isfinite, parameter_vector(result.updated_parameters))
         @test isfinite(result.updated_value)

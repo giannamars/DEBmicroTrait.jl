@@ -36,6 +36,7 @@ parameter_vector(parameters::TinyTrainingParameters) = [parameters.k_uptake, par
 tiny_parameters(parameters::AbstractVector) = TinyTrainingParameters(parameters[1], parameters[2], parameters[3])
 tiny_parameters(parameters::NamedTuple) = TinyTrainingParameters(parameters)
 tiny_parameters(parameters::TinyTrainingParameters) = parameters
+tiny_parameters(encoder::TraitEncoder, traits::AbstractVector) = TinyTrainingParameters(trait_parameters(encoder, traits))
 
 function tiny_model(problem::TinyTrainingProblem, parameters::TinyTrainingParameters)
     build_model(problem.layout, build_parameters((k_uptake = parameters.k_uptake, yield = parameters.yield, k_decay = parameters.k_decay)))
@@ -55,8 +56,12 @@ function tiny_training_step(problem::TinyTrainingProblem; backend::TinyGradientB
     return (; value, gradient = gradient[1], updated_parameters, updated_value)
 end
 
-function run_tiny_training_example(; initial_parameters = TinyTrainingParameters(0.5, 0.4, 0.1), backend = nothing, alg = nothing, sensealg = nothing)
+function run_tiny_training_example(; initial_parameters = TinyTrainingParameters(0.5, 0.4, 0.1), initial_traits = nothing, trait_encoder = nothing, backend = nothing, alg = nothing, sensealg = nothing)
     layout = build_state_layout([:substrate, :biomass, :mineral], [1, 1, 1])
+    if initial_traits !== nothing
+        trait_encoder === nothing && throw(ArgumentError("pass trait_encoder when using initial_traits"))
+        initial_parameters = tiny_parameters(trait_encoder, initial_traits)
+    end
     problem = TinyTrainingProblem(layout, [1.0, 0.2, 0.0], (0.0, 10.0), [0.75, 0.25, 0.25];
         initial_parameters = initial_parameters,
         step_size = 0.1,
