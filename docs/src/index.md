@@ -33,6 +33,8 @@ The same example is available as `examples/sciml_tiny_example.jl`.
 
 For a real gradient smoke test, see `examples/sciml_gradient_smoke.jl`.
 
+For a tiny training prototype, see `examples/train_tiny_example.jl`.
+
 ```@index
 ```
 

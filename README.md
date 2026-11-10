@@ -30,3 +30,5 @@ If the SciML packages are not installed, the core package still loads, and the b
 See `examples/sciml_tiny_example.jl` for the same setup as a runnable script.
 
 For a real differentiability smoke test, see `examples/sciml_gradient_smoke.jl`.
+
+For a tiny training prototype, see `examples/train_tiny_example.jl`.

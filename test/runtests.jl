@@ -101,3 +101,25 @@ end
         @test true
     end
 end
+
+@testset "tiny training example" begin
+    @test isfile(joinpath(@__DIR__, "..", "examples", "train_tiny_example.jl"))
+end
+
+@testset "tiny training api" begin
+    if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
+        include(joinpath(@__DIR__, "..", "examples", "train_tiny_example.jl"))
+        result = run_tiny_training_example(
+            backend = TINY_TRAINING_BACKEND,
+            alg = TINY_TRAINING_ALG,
+            sensealg = TINY_TRAINING_SENSEALG,
+        )
+
+        @test isfinite(result.value)
+        @test isfinite(result.gradient)
+        @test isfinite(result.updated_yield)
+        @test isfinite(result.updated_value)
+    else
+        @test true
+    end
+end
