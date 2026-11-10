@@ -69,7 +69,7 @@ function TraitEncoder(weights, biases, hidden_activation = relu;
         bias_layer isa AbstractVector || throw(ArgumentError("each bias layer must be a vector"))
         size(weight_layer, 1) == length(bias_layer) || throw(ArgumentError("each weight matrix must match its bias vector"))
         if index < length(weight_layers)
-            size(weight_layer, 2) == size(weight_layers[index + 1], 1) || throw(ArgumentError("adjacent layers must agree in their dimensions"))
+            size(weight_layer, 1) == size(weight_layers[index + 1], 2) || throw(ArgumentError("adjacent layers must agree in their dimensions"))
         end
     end
 

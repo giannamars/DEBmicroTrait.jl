@@ -235,3 +235,60 @@ end
     @test isapprox(sum(du), 0.0; atol = 1e-12)
     @test isapprox(hysomi_mass_balance(u, model), sum(u))
 end
+
+@testset "hysomi trait scaffold" begin
+    encoder = TraitEncoder(
+        (
+            zeros(20, HYSOMI_TRAIT_INPUT_DIM),
+            zeros(length(HYSOMI_BIOPAR_NAMES), 20),
+        ),
+        (
+            zeros(20),
+            zeros(length(HYSOMI_BIOPAR_NAMES)),
+        ),
+        relu;
+        output_activation = sigmoid,
+        parameter_names = HYSOMI_BIOPAR_NAMES,
+        parameter_ranges = HYSOMI_BIOPAR_RANGES,
+    )
+    traits = zeros(HYSOMI_TRAIT_INPUT_DIM)
+    biopar = trait_parameters(encoder, traits)
+
+    @test keys(biopar) == HYSOMI_BIOPAR_NAMES
+    @test length(values(biopar)) == length(HYSOMI_BIOPAR_NAMES)
+    @test all(isfinite, values(biopar))
+end
+
+@testset "hysomi loss scaffold" begin
+    required_packages = ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote")
+    if all(pkg -> Base.find_package(pkg) !== nothing, required_packages)
+        encoder = TraitEncoder(
+            (
+                zeros(20, HYSOMI_TRAIT_INPUT_DIM),
+                zeros(length(HYSOMI_BIOPAR_NAMES), 20),
+            ),
+            (
+                zeros(20),
+                zeros(length(HYSOMI_BIOPAR_NAMES)),
+            ),
+            relu;
+            output_activation = sigmoid,
+            parameter_names = HYSOMI_BIOPAR_NAMES,
+            parameter_ranges = HYSOMI_BIOPAR_RANGES,
+        )
+        traits = zeros(HYSOMI_TRAIT_INPUT_DIM)
+        soilpar = (k_a = 0.1, k_d = 0.01, C_S_max = 1.0, I_C_L = 0.0, I_C_H = 0.0)
+        u0 = [0.1, 0.2, 1.0, 10.0, 0.5, 0.0]
+        model = build_hysomi_model(hysomi_state_layout(), build_hysomi_parameters(trait_parameters(encoder, traits), soilpar))
+        solution = simulate(model, u0, (0.0, 1.0); saveat = 1.0)
+        target = hysomi_trajectory_matrix(solution)
+
+        components = hysomi_loss_components(encoder, traits, soilpar, u0, (0.0, 1.0), target; saveat = 1.0)
+
+        @test isfinite(components.total_loss)
+        @test isapprox(components.data_loss, 0.0; atol = 1e-8)
+        @test components.model isa HysomiModel
+    else
+        @test true
+    end
+end
