@@ -1,17 +1,20 @@
 name = "DEBmicroTrait"
 uuid = "646e67d3-9d04-4312-a4b2-690a4059c727"
-authors = ["Gianna Marschmann"]
 version = "0.1.0"
+authors = ["Gianna Marschmann"]
 
 [deps]
-
-[weakdeps]
-OrdinaryDiffEq = "1dea7af3-3d6e-5b49-9dbd-6f2d9bba1a0b"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 SciMLSensitivity = "1ed8b502-d754-442c-8d5d-10ac956f44a1"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [extensions]
 DEBmicroTraitOrdinaryDiffEqExt = ["OrdinaryDiffEq", "SciMLBase", "SciMLSensitivity"]
 
 [compat]
+OrdinaryDiffEq = "7.8.1"
+SciMLBase = "3.58.0"
+SciMLSensitivity = "7.119.14"
+Zygote = "0.7.16"
 julia = "1.13"

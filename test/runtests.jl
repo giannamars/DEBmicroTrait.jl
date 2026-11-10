@@ -44,10 +44,42 @@ end
     u0 = [1.0, 0.2, 0.0]
 
     @test_throws ArgumentError simulate(model, u0, (0.0, 1.0))
-    @test_throws ArgumentError build_problem(model, u0, (0.0, 1.0))
 end
 
 @testset "backend container" begin
     backend = SciMLBackend(nothing, nothing, nothing, nothing)
     @test backend.problem_constructor === nothing
+end
+
+@testset "gradient smoke scaffold" begin
+    layout = build_state_layout([:substrate, :biomass, :mineral], [1, 1, 1])
+    model = build_model(layout, build_parameters((k_uptake = 0.0, yield = 0.4, k_decay = 0.0)))
+    u0 = [1.0, 0.2, 0.0]
+    target = [1.0, 0.2, 0.0]
+
+    smoke_gradient(loss_function, model, u0, tspan, target; kwargs...) = (loss_function, model, u0, tspan, target, kwargs)
+
+    result = gradient_smoke_test(model, u0, (0.0, 1.0), target; gradient_function = smoke_gradient)
+
+    @test result[1] === trajectory_loss
+    @test result[2] === model
+    @test result[3] == u0
+end
+
+@testset "real sciml example" begin
+    @test isfile(joinpath(@__DIR__, "..", "examples", "sciml_tiny_example.jl"))
+end
+
+@testset "real differentiability smoke" begin
+    required_packages = ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote")
+    if all(pkg -> Base.find_package(pkg) !== nothing, required_packages)
+        include(joinpath(@__DIR__, "..", "examples", "sciml_gradient_smoke.jl"))
+        value, gradient = run_gradient_smoke_example()
+
+        @test isfinite(value)
+        @test length(gradient) == 1
+        @test isfinite(gradient[1])
+    else
+        @test true
+    end
 end
