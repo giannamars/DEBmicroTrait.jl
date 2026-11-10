@@ -1,0 +1,16 @@
+name: torch_cpu_env_min
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - git-lfs
+  - pip
+  - pip:
+      - numpy==2.3.1
+      - scipy==1.15.2
+      - setuptools==70.2.0
+      - torch==2.7.0
+      - torchdiffeq==0.2.5
+      - torchvision==0.22.0
+      - tqdm==4.67.1
+      - ipykernel==6.29.5
