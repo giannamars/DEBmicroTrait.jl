@@ -2,6 +2,23 @@ using Test
 using DEBmicroTrait
 using LinearAlgebra
 
+make_hysomi_smoke_encoder(weight_offset, bias_offset) = TraitEncoder(
+    (
+        reshape(range(weight_offset, step = 0.01, length = HYSOMI_TRAIT_INPUT_DIM), 1, HYSOMI_TRAIT_INPUT_DIM),
+        reshape(range(weight_offset + 0.5, step = 0.01, length = length(HYSOMI_BIOPAR_NAMES)), length(HYSOMI_BIOPAR_NAMES), 1),
+    ),
+    (
+        collect(range(bias_offset, step = 0.01, length = 1)),
+        collect(range(bias_offset + 0.05, step = 0.01, length = length(HYSOMI_BIOPAR_NAMES))),
+    ),
+    relu;
+    output_activation = sigmoid,
+    parameter_names = HYSOMI_BIOPAR_NAMES,
+    parameter_ranges = HYSOMI_BIOPAR_RANGES,
+)
+
+make_hysomi_smoke_traits(prefix) = vcat(prefix, zeros(HYSOMI_TRAIT_INPUT_DIM - length(prefix)))
+
 if Base.find_package("OrdinaryDiffEq") !== nothing
     @eval using OrdinaryDiffEq
 end
@@ -257,6 +274,143 @@ end
     @test keys(biopar) == HYSOMI_BIOPAR_NAMES
     @test length(values(biopar)) == length(HYSOMI_BIOPAR_NAMES)
     @test all(isfinite, values(biopar))
+end
+
+@testset "hysomi training helpers" begin
+    template = make_hysomi_smoke_encoder(0.05, -0.02)
+    state = hysomi_encoder_state(template)
+    rebuilt = hysomi_rebuild_encoder(template, state)
+    traits = make_hysomi_smoke_traits([0.5, 0.4, 0.1])
+
+    @test trait_parameters(rebuilt, traits) == trait_parameters(template, traits)
+
+    if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
+        teacher = make_hysomi_smoke_encoder(0.15, 0.03)
+        soilpar = (
+            k_a = 0.1,
+            k_d = 0.01,
+            C_S_max = 1.0,
+            I_C_L = 0.0,
+            I_C_H = 0.0,
+        )
+        dataset = hysomi_generate_dataset(
+            teacher,
+            [traits, make_hysomi_smoke_traits([0.2, 0.3, 0.7])];
+            soilpar = soilpar,
+            u0 = [0.1, 0.2, 1.0, 10.0, 0.5, 0.0],
+            tspan = (0.0, 1.0),
+            alg = Tsit5(),
+            saveat = 1.0,
+        )
+
+        @test length(dataset) == 2
+        @test size(dataset[1].target, 1) == length(HYSOMI_STATE_NAMES)
+        @test size(dataset[1].target, 2) == 2
+
+        step = hysomi_training_step(
+            state,
+            dataset,
+            template;
+            step_size = 1e-10,
+            backend = Zygote.withgradient,
+            alg = Tsit5(),
+            sensealg = InterpolatingAdjoint(),
+            saveat = 1.0,
+        )
+
+        epoch = hysomi_training_epoch(
+            state,
+            dataset,
+            template;
+            batch_size = 1,
+            step_size = 1e-10,
+            backend = Zygote.withgradient,
+            alg = Tsit5(),
+            sensealg = InterpolatingAdjoint(),
+            saveat = 1.0,
+        )
+
+        @test isfinite(step.value)
+        @test isfinite(step.updated_value)
+        @test length(step.gradient) == length(state)
+        @test all(isfinite, step.gradient)
+        @test all(isfinite, step.updated_state)
+        @test length(epoch.losses) == 2
+        @test all(isfinite, epoch.losses)
+    else
+        @test true
+    end
+end
+
+@testset "hysomi synthetic data" begin
+    constraint_sample = [0.5, 0.2, 0.3, 0.4, 0.8, 0.7, 0.2, 0.1, 0.6, 0.9, 0.1, 0.0, 0.0]
+    invalid_sample = [0.5, 0.2, 0.3, 0.4, 0.8, 0.9, 0.2, 0.1, 0.6, 0.9, 0.1, 0.0, 0.0]
+
+    @test hysomi_parameter_constraint(constraint_sample)
+    @test !hysomi_parameter_constraint(invalid_sample)
+
+    valid_target = permutedims(hcat(
+        vcat(fill(0.1, 20), fill(0.4, 10), fill(0.1, 30)),
+        fill(0.3, 60),
+        fill(0.8, 60),
+        fill(0.6, 60),
+        fill(0.2, 60),
+        fill(0.0, 60),
+    ))
+    @test hysomi_process_filter(valid_target)
+
+    invalid_target = copy(valid_target)
+    invalid_target[3, 1] = 0.0
+    @test !hysomi_process_filter(invalid_target)
+
+    sampled = hysomi_constrained_sampling(HYSOMI_BIOPAR_RANGES, 3)
+    @test size(sampled) == (3, length(HYSOMI_BIOPAR_NAMES))
+    @test all(row -> hysomi_parameter_constraint(collect(row)), eachrow(sampled))
+
+    if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
+        teacher = make_hysomi_smoke_encoder(0.15, 0.03)
+        trait_map = _ -> make_hysomi_smoke_traits([0.5, 0.4, 0.1])
+        synthetic = hysomi_generate_synthetic_dataset(
+            trait_map,
+            teacher,
+            HYSOMI_BIOPAR_RANGES,
+            2;
+            soilpar = (
+                k_a = 0.1,
+                k_d = 0.01,
+                C_S_max = 1.0,
+                I_C_L = 0.0,
+                I_C_H = 0.0,
+            ),
+            u0 = [0.1, 0.2, 1.0, 10.0, 0.5, 0.0],
+            tspan = (0.0, 1.0),
+            alg = Tsit5(),
+            saveat = 1.0,
+        )
+
+        @test length(synthetic) == 2
+        @test all(sample -> hasproperty(sample, :parameters), synthetic)
+        @test all(sample -> length(sample.parameters) == length(HYSOMI_BIOPAR_NAMES), synthetic)
+        @test all(sample -> size(sample.target, 1) == length(HYSOMI_STATE_NAMES), synthetic)
+        @test all(sample -> all(isfinite, sample.target), synthetic)
+    else
+        @test true
+    end
+end
+
+@testset "hysomi synthetic data example" begin
+    if Base.find_package("OrdinaryDiffEq") !== nothing
+        include(joinpath(@__DIR__, "..", "examples", "hysomi_synthetic_data_example.jl"))
+        result = run_hysomi_synthetic_data_example(2)
+        @test size(result.raw_parameters, 2) == length(HYSOMI_BIOPAR_NAMES)
+        @test length(result.raw_dataset) == size(result.raw_parameters, 1)
+        @test length(result.mask) == length(result.raw_dataset)
+        @test length(result.filtered_dataset) == count(identity, result.mask)
+        @test all(sample -> length(sample.traits) == HYSOMI_TRAIT_INPUT_DIM, result.raw_dataset)
+        @test all(sample -> size(sample.target, 1) == length(HYSOMI_STATE_NAMES), result.raw_dataset)
+    else
+        @test true
+    end
 end
 
 @testset "hysomi loss scaffold" begin

@@ -26,10 +26,16 @@ const HYSOMI_SOILPAR_RANGES = [
     0.0 10.0;
 ]
 
-struct HysomiParameters{B,S}
+struct HysomiParameters{B<:AbstractVector,S<:AbstractVector}
     biopar::B
     soilpar::S
 end
+
+_hysomi_parameter_vector(values) = values isa NamedTuple ? collect(Base.values(values)) : collect(values)
+
+HysomiParameters(biopar, soilpar) = HysomiParameters(_hysomi_parameter_vector(biopar), _hysomi_parameter_vector(soilpar))
+
+HysomiParameters(biopar::NamedTuple, soilpar::NamedTuple) = HysomiParameters(_hysomi_parameter_vector(biopar), _hysomi_parameter_vector(soilpar))
 
 HysomiParameters(values::NamedTuple) = HysomiParameters(values.biopar, values.soilpar)
 
@@ -38,17 +44,15 @@ function build_hysomi_parameters(biopar::NamedTuple, soilpar::NamedTuple)
 end
 
 function hysomi_biopar_vector(parameters::HysomiParameters)
-    biopar = parameters.biopar
-    return [getproperty(biopar, name) for name in HYSOMI_BIOPAR_NAMES]
+    return parameters.biopar
 end
 
 function hysomi_soilpar_vector(parameters::HysomiParameters)
-    soilpar = parameters.soilpar
-    return [getproperty(soilpar, name) for name in HYSOMI_SOILPAR_NAMES]
+    return parameters.soilpar
 end
 
 function hysomi_parameter_vector(parameters::HysomiParameters)
-    return vcat(hysomi_biopar_vector(parameters), hysomi_soilpar_vector(parameters))
+    return vcat(parameters.biopar, parameters.soilpar)
 end
 
 struct HysomiModel{L,P}
@@ -56,12 +60,14 @@ struct HysomiModel{L,P}
     parameters::P
 end
 
+const HYSOMI_STATE_LAYOUT = build_state_layout(collect(HYSOMI_STATE_NAMES), fill(1, length(HYSOMI_STATE_NAMES)))
+
 build_hysomi_model(state_layout::StateLayout, parameters::HysomiParameters) = HysomiModel(state_layout, parameters)
 
 parameter_vector(model::HysomiModel) = hysomi_parameter_vector(model.parameters)
 
 function hysomi_state_layout()
-    return build_state_layout(collect(HYSOMI_STATE_NAMES), fill(1, length(HYSOMI_STATE_NAMES)))
+    return HYSOMI_STATE_LAYOUT
 end
 
 function hysomi_rhs!(du, u, p, t)

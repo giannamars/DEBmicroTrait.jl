@@ -10,6 +10,7 @@ function DEBmicroTrait.simulate(model::SoilModel, u0::AbstractVector, tspan::Tup
     alg = Tsit5(),
     sensealg = InterpolatingAdjoint(),
     solve_function = SciMLBase.solve,
+    kwargs...,
 )
     problem = ODEProblem(
         DEBmicroTrait.sciml_rhs!,
@@ -18,9 +19,9 @@ function DEBmicroTrait.simulate(model::SoilModel, u0::AbstractVector, tspan::Tup
         DEBmicroTrait.parameter_vector(model),
     )
     if saveat === nothing
-        return solve_function(problem, alg; sensealg = sensealg)
+        return solve_function(problem, alg; sensealg = sensealg, kwargs...)
     end
-    return solve_function(problem, alg; saveat = saveat, sensealg = sensealg)
+    return solve_function(problem, alg; saveat = saveat, sensealg = sensealg, kwargs...)
 end
 
 function DEBmicroTrait.simulate(model::HysomiModel, u0::AbstractVector, tspan::Tuple{<:Real,<:Real};
@@ -28,6 +29,7 @@ function DEBmicroTrait.simulate(model::HysomiModel, u0::AbstractVector, tspan::T
     alg = Tsit5(),
     sensealg = InterpolatingAdjoint(),
     solve_function = SciMLBase.solve,
+    kwargs...,
 )
     problem = ODEProblem(
         DEBmicroTrait.hysomi_rhs!,
@@ -36,9 +38,9 @@ function DEBmicroTrait.simulate(model::HysomiModel, u0::AbstractVector, tspan::T
         DEBmicroTrait.parameter_vector(model),
     )
     if saveat === nothing
-        return solve_function(problem, alg; sensealg = sensealg)
+        return solve_function(problem, alg; sensealg = sensealg, kwargs...)
     end
-    return solve_function(problem, alg; saveat = saveat, sensealg = sensealg)
+    return solve_function(problem, alg; saveat = saveat, sensealg = sensealg, kwargs...)
 end
 
 end
