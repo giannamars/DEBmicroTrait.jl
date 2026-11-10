@@ -1,6 +1,18 @@
 using Test
 using DEBmicroTrait
 
+if Base.find_package("OrdinaryDiffEq") !== nothing
+    @eval using OrdinaryDiffEq
+end
+
+if Base.find_package("SciMLSensitivity") !== nothing
+    @eval using SciMLSensitivity
+end
+
+if Base.find_package("Zygote") !== nothing
+    @eval using Zygote
+end
+
 @testset "layout" begin
     layout = build_state_layout([:substrate, :biomass, :mineral], [1, 1, 1])
     @test layout.dim == 3
@@ -43,7 +55,13 @@ end
     model = build_model(layout, build_parameters((k_uptake = 0.0, yield = 0.4, k_decay = 0.0)))
     u0 = [1.0, 0.2, 0.0]
 
-    @test_throws ArgumentError simulate(model, u0, (0.0, 1.0))
+    if Base.find_package("OrdinaryDiffEq") !== nothing && Base.find_package("SciMLSensitivity") !== nothing
+        solution = simulate(model, u0, (0.0, 1.0); saveat = 1.0)
+        @test length(solution.t) == 2
+        @test solution.u[end] == u0
+    else
+        @test_throws ArgumentError simulate(model, u0, (0.0, 1.0))
+    end
 end
 
 @testset "backend container" begin
