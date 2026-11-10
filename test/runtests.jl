@@ -110,14 +110,17 @@ end
     if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
         include(joinpath(@__DIR__, "..", "examples", "train_tiny_example.jl"))
         result = run_tiny_training_example(
+            initial_parameters = TINY_TRAINING_INITIAL_PARAMETERS,
             backend = TINY_TRAINING_BACKEND,
             alg = TINY_TRAINING_ALG,
             sensealg = TINY_TRAINING_SENSEALG,
         )
 
         @test isfinite(result.value)
-        @test isfinite(result.gradient)
-        @test isfinite(result.updated_yield)
+        @test length(result.gradient) == 3
+        @test result.updated_parameters isa TinyTrainingParameters
+        @test all(isfinite, result.gradient)
+        @test all(isfinite, parameter_vector(result.updated_parameters))
         @test isfinite(result.updated_value)
     else
         @test true
