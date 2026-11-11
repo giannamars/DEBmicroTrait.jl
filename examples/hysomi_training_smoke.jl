@@ -5,8 +5,8 @@ using Zygote
 
 make_hysomi_smoke_encoder(weight_offset, bias_offset) = TraitEncoder(
     (
-        reshape(range(weight_offset, step = 0.01, length = HYSOMI_TRAIT_INPUT_DIM), 1, HYSOMI_TRAIT_INPUT_DIM),
-        reshape(range(weight_offset + 0.5, step = 0.01, length = length(HYSOMI_BIOPAR_NAMES)), length(HYSOMI_BIOPAR_NAMES), 1),
+        reshape(collect(range(weight_offset, step = 0.01, length = HYSOMI_TRAIT_INPUT_DIM)), 1, HYSOMI_TRAIT_INPUT_DIM),
+        reshape(collect(range(weight_offset + 0.5, step = 0.01, length = length(HYSOMI_BIOPAR_NAMES))), length(HYSOMI_BIOPAR_NAMES), 1),
     ),
     (
         collect(range(bias_offset, step = 0.01, length = 1)),

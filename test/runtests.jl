@@ -4,8 +4,8 @@ using LinearAlgebra
 
 make_hysomi_smoke_encoder(weight_offset, bias_offset) = TraitEncoder(
     (
-        reshape(range(weight_offset, step = 0.01, length = HYSOMI_TRAIT_INPUT_DIM), 1, HYSOMI_TRAIT_INPUT_DIM),
-        reshape(range(weight_offset + 0.5, step = 0.01, length = length(HYSOMI_BIOPAR_NAMES)), length(HYSOMI_BIOPAR_NAMES), 1),
+        reshape(collect(range(weight_offset, step = 0.01, length = HYSOMI_TRAIT_INPUT_DIM)), 1, HYSOMI_TRAIT_INPUT_DIM),
+        reshape(collect(range(weight_offset + 0.5, step = 0.01, length = length(HYSOMI_BIOPAR_NAMES))), length(HYSOMI_BIOPAR_NAMES), 1),
     ),
     (
         collect(range(bias_offset, step = 0.01, length = 1)),
@@ -132,6 +132,44 @@ end
 
     @test loss(prediction, target, model) == 5.0
     @test training_step!(model, (prediction, target)) == 5.0
+end
+
+@testset "hybrid loss helpers" begin
+    @test isapprox(softargmax1d([0.0, 1.0, 0.0]; beta = 1e6), 1.0; atol = 1e-6)
+    @test size(softargmax2d([0.0 0.0; 0.0 1.0]; beta = 1e6)) == (1, 2)
+    @test peak_width_v2([0.1, 0.6, 0.9], 0.5; k = 1e6) ≈ 2.0
+
+    awl = AutomaticWeightedLossL2(3)
+    @test isfinite(awl([1.0, 2.0, 3.0]))
+    @test no_constraint_module(2)([4.0, 5.0]) == 4.0
+
+    pred = zeros(6, 60, 2)
+    data = zeros(6, 60, 2)
+    for batch in 1:2
+        center = batch == 1 ? 20 : 35
+        for time in 1:60
+            pred[1, time, batch] = exp(-((time - center) / 6)^2)
+            pred[2, time, batch] = 1.5
+            pred[3, time, batch] = 0.3
+            pred[4, time, batch] = 1.0
+            pred[5, time, batch] = 0.1
+            pred[6, time, batch] = 0.2
+        end
+    end
+    data .= pred
+
+    par = hcat([fill(value, 2) for value in (1.0, 0.5, 0.4, 0.2, 3.0, 2.0, 0.7, 0.2, 0.4, 0.5, 0.3, 0.2, 0.3)]...)
+    true_par = copy(par)
+    par_trans_list = (ones(13), zeros(13))
+    loss_module = loss_constraint_autoW3(1:6, 1e3)
+    result = loss_module(pred, data, par, true_par, par_trans_list)
+
+    @test length(result.loss_tensor) == 15
+    @test length(result.constraint_tensor) == 14
+    @test length(result.ana_loss) == 10
+    @test length(result.theta_L1_tensor) == 13
+    @test all(isfinite, result.loss_tensor)
+    @test isfinite(result.loss_pred)
 end
 
 @testset "simulate" begin

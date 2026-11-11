@@ -23,12 +23,22 @@ function hysomi_parameter_constraint_loss(parameters::AbstractVector)
     return constraint_penalty(parameters[11], parameters[1]) + constraint_penalty(parameters[1], parameters[6]) + constraint_penalty(parameters[6], parameters[5])
 end
 
-softargmax1d(values; beta = 1e4) = begin
-    shifted = values .- maximum(values)
-    probabilities = exp.(beta .* shifted)
-    probabilities = probabilities ./ sum(probabilities)
-    positions = collect(0:length(values) - 1)
-    return sum(probabilities .* positions)
+function softargmax1d(values; beta = 1e4)
+    if values isa AbstractVector
+        shifted = values .- maximum(values)
+        probabilities = exp.(beta .* shifted)
+        probabilities = probabilities ./ sum(probabilities)
+        positions = collect(0:(length(values) - 1))
+        return sum(probabilities .* positions)
+    elseif ndims(values) == 2
+        shifted = values .- maximum(values; dims = 1)
+        probabilities = exp.(beta .* shifted)
+        probabilities = probabilities ./ sum(probabilities; dims = 1)
+        positions = collect(0:(size(values, 1) - 1))
+        return vec(sum(probabilities .* positions, dims = 1))
+    else
+        throw(ArgumentError("softargmax1d expects a vector or a matrix"))
+    end
 end
 
 peak_width(values; threshold = 0.5, sharpness = 1e3) = sum(1.0 ./ (1.0 .+ exp.(-sharpness .* (values .- threshold))))
