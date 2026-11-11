@@ -389,6 +389,20 @@ function _hysomi_config_value(value)
     end
 end
 
+function _hysomi_dict(value)
+    if value isa NamedTuple
+        return Dict{String,Any}(string(key) => _hysomi_dict(getproperty(value, key)) for key in keys(value))
+    elseif value isa AbstractDict
+        return Dict{String,Any}(string(key) => _hysomi_dict(entry) for (key, entry) in value)
+    elseif value isa AbstractArray
+        return [_hysomi_dict(entry) for entry in value]
+    elseif value isa Symbol
+        return String(value)
+    else
+        return value
+    end
+end
+
 function _hysomi_config_string(value)
     if value isa NamedTuple
         parts = [string(key, "=", _hysomi_config_string(getproperty(value, key))) for key in keys(value)]
@@ -497,6 +511,74 @@ function hysomi_train_from_config(config::AbstractDict, template::TraitEncoder; 
     finally
         isfile(temp_path) && rm(temp_path; force = true)
     end
+end
+
+function hysomi_run_experiment(
+    teacher_encoder::TraitEncoder,
+    template::TraitEncoder,
+    train_traits::AbstractVector,
+    test_traits::AbstractVector = train_traits;
+    NN_hyperpar = (model = "hysomi_trait_encoder", input_dim = HYSOMI_TRAIT_INPUT_DIM),
+    loss_hyperpar = (data_sel = collect(eachindex(HYSOMI_STATE_NAMES)), k = 1e3),
+    training_hyperpar = NamedTuple(),
+    training_outputs_library_path = pwd(),
+    soilpar,
+    u0::AbstractVector,
+    tspan::Tuple{<:Real,<:Real},
+    save_artifacts::Bool = true,
+    backend = nothing,
+    kwargs...,
+)
+    backend === nothing && throw(ArgumentError("pass a backend, for example Zygote.withgradient"))
+    bundle = hysomi_hyperpar_to_toml(NN_hyperpar, loss_hyperpar, training_hyperpar, training_outputs_library_path)
+
+    train_dataset = hysomi_generate_dataset(teacher_encoder, train_traits; soilpar = soilpar, u0 = u0, tspan = tspan, kwargs...)
+    test_dataset = hysomi_generate_dataset(teacher_encoder, test_traits; soilpar = soilpar, u0 = u0, tspan = tspan, kwargs...)
+
+    train_dataset_path = joinpath(bundle.out_dir, "train_dataset.jls")
+    test_dataset_path = joinpath(bundle.out_dir, "test_dataset.jls")
+    open(train_dataset_path, "w") do io
+        Serialization.serialize(io, train_dataset)
+    end
+    open(test_dataset_path, "w") do io
+        Serialization.serialize(io, test_dataset)
+    end
+
+    training_dict = Dict{String,Any}(_hysomi_dict(training_hyperpar))
+    training_dict["dataset_path"] = train_dataset_path
+    training_dict["output_dir"] = bundle.out_dir
+
+    config = Dict{String,Any}(
+        "NN_hyperpars" => _hysomi_dict(NN_hyperpar),
+        "loss_hyperpar" => _hysomi_dict(loss_hyperpar),
+        "training_hyperpar" => training_dict,
+    )
+    config_path = bundle.path_to_file
+    open(config_path, "w") do io
+        TOML.print(io, config)
+    end
+
+    train_result = hysomi_train_from_config(
+        config_path,
+        template;
+        dataset_loader = hysomi_load_serialized_dataset,
+        initial_state = hysomi_encoder_state(template),
+        out_dir = bundle.out_dir,
+        save_result = save_artifacts,
+        backend = backend,
+        kwargs...,
+    )
+
+    evaluation_loss = hysomi_batch_loss(train_result.result.state, test_dataset, template; kwargs...)
+    trained_encoder = hysomi_rebuild_encoder(template, train_result.result.state)
+
+    if save_artifacts
+        open(joinpath(bundle.out_dir, "evaluation_result.jls"), "w") do io
+            Serialization.serialize(io, (; evaluation_loss))
+        end
+    end
+
+    return (; bundle, train_dataset, test_dataset, train_result, evaluation_loss, trained_encoder)
 end
 
 function hysomi_update_state(state, gradient, step_size)

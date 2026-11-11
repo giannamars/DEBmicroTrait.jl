@@ -353,6 +353,64 @@ end
     end
 end
 
+@testset "hysomi experiment wrapper" begin
+    if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
+        include(joinpath(@__DIR__, "..", "examples", "hysomi_training_smoke.jl"))
+        mktempdir() do tempdir
+            result = DEBmicroTrait.hysomi_run_experiment(
+                HYSOMI_SMOKE_TEACHER,
+                HYSOMI_SMOKE_TEMPLATE,
+                HYSOMI_SMOKE_TRAITS,
+                reverse(HYSOMI_SMOKE_TRAITS);
+                NN_hyperpar = (model = "hysomi_trait_encoder", input_dim = HYSOMI_TRAIT_INPUT_DIM),
+                loss_hyperpar = (data_sel = collect(eachindex(HYSOMI_STATE_NAMES)), k = 1e3),
+                training_hyperpar = (epochs = 2, batch_size = 1, lr = 1e-10, validation_fraction = 0.0, shuffle = false),
+                training_outputs_library_path = tempdir,
+                soilpar = HYSOMI_SMOKE_SOILPAR,
+                u0 = HYSOMI_SMOKE_U0,
+                tspan = HYSOMI_SMOKE_TSPAN,
+                save_artifacts = true,
+                backend = Zygote.withgradient,
+                alg = HYSOMI_SMOKE_ALG,
+                sensealg = HYSOMI_SMOKE_SENSEALG,
+                saveat = 1.0,
+            )
+
+            @test isfile(joinpath(result.bundle.out_dir, "hyper_dict.toml"))
+            @test isfile(joinpath(result.bundle.out_dir, "train_dataset.jls"))
+            @test isfile(joinpath(result.bundle.out_dir, "test_dataset.jls"))
+            @test isfile(joinpath(result.bundle.out_dir, "training_result.jls"))
+            @test isfile(joinpath(result.bundle.out_dir, "evaluation_result.jls"))
+            @test length(result.train_result.result.train_losses) == 2
+            @test isfinite(result.evaluation_loss)
+            @test length(result.trained_encoder.weights) == length(HYSOMI_SMOKE_TEMPLATE.weights)
+        end
+    else
+        @test true
+    end
+end
+
+@testset "hysomi start training script" begin
+    if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
+        include(joinpath(@__DIR__, "..", "examples", "hysomi_start_training.jl"))
+        mktempdir() do tempdir
+            data_path = joinpath(tempdir, "synthetic_data")
+            output_path = joinpath(tempdir, "outputs")
+            result = run_hysomi_start_training_example(; data_path = data_path, output_path = output_path, save_artifacts = true)
+            run_dir = result.bundle.out_dir
+
+            @test isfile(joinpath(data_path, "train_dataset.jls"))
+            @test isfile(joinpath(data_path, "test_dataset.jls"))
+            @test isfile(joinpath(run_dir, "hyper_dict.toml"))
+            @test isfile(joinpath(run_dir, "train_dataset.jls"))
+            @test isfile(joinpath(run_dir, "test_dataset.jls"))
+            @test isfinite(result.evaluation_loss)
+        end
+    else
+        @test true
+    end
+end
+
 @testset "hysomi core" begin
     layout = hysomi_state_layout()
     @test layout.dim == 6
