@@ -2,15 +2,7 @@ using DEBmicroTrait
 using OrdinaryDiffEq
 
 const HYSOMI_SYNTHETIC_OUTPUT_PATH = joinpath(@__DIR__, "data", "synthetic_data")
-
-function hysomi_synthetic_trait_map(parameters)
-    normalized = unitize(collect(parameters), HYSOMI_BIOPAR_RANGES[:, 1], HYSOMI_BIOPAR_RANGES[:, 2])
-    traits = Vector{Float64}(undef, HYSOMI_TRAIT_INPUT_DIM)
-    for index in eachindex(traits)
-        traits[index] = normalized[mod1(index, length(normalized))]
-    end
-    return traits
-end
+const HYSOMI_SYNTHETIC_TRAIT_RANGES = repeat([5.0 200.0], HYSOMI_TRAIT_INPUT_DIM, 1)
 
 function make_hysomi_synthetic_teacher()
     return TraitEncoder(
@@ -42,10 +34,9 @@ const HYSOMI_SYNTHETIC_TSPAN = (0.0, 7.0)
 const HYSOMI_SYNTHETIC_ALG = Tsit5()
 
 function run_hysomi_synthetic_data_example(n::Integer = 3; output_path::AbstractString = HYSOMI_SYNTHETIC_OUTPUT_PATH, save_artifacts::Bool = false)
-    teacher = make_hysomi_synthetic_teacher()
+    trait_map = hysomi_synthetic_trait_encoder(HYSOMI_SYNTHETIC_TRAIT_RANGES)
     result = hysomi_generate_python_style_synthetic_dataset(
-        hysomi_synthetic_trait_map,
-        teacher,
+        trait_map,
         HYSOMI_BIOPAR_RANGES,
         n;
         soilpar = HYSOMI_SYNTHETIC_SOILPAR,
@@ -62,6 +53,8 @@ function run_hysomi_synthetic_data_example(n::Integer = 3; output_path::Abstract
             config = (
                 n = n,
                 trait_input_dim = HYSOMI_TRAIT_INPUT_DIM,
+                trait_range_lower = 5.0,
+                trait_range_upper = 200.0,
                 soilpar = HYSOMI_SYNTHETIC_SOILPAR,
                 u0 = HYSOMI_SYNTHETIC_U0,
                 tspan = HYSOMI_SYNTHETIC_TSPAN,

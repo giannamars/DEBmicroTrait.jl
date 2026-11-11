@@ -7,6 +7,36 @@ function hysomi_parameter_constraint(theta::AbstractVector)
     return m_max < mu && mu < d_B && d_B < r_B
 end
 
+function _hysomi_uniform_layer(output_dim::Integer, input_dim::Integer; rng = nothing)
+    output_dim > 0 || throw(ArgumentError("output_dim must be positive"))
+    input_dim > 0 || throw(ArgumentError("input_dim must be positive"))
+    bound = inv(sqrt(input_dim))
+    if rng === nothing
+        weights = (rand(output_dim, input_dim) .* 2 .- 1) .* bound
+        bias = (rand(output_dim) .* 2 .- 1) .* bound
+    else
+        weights = (rand(rng, output_dim, input_dim) .* 2 .- 1) .* bound
+        bias = (rand(rng, output_dim) .* 2 .- 1) .* bound
+    end
+    return weights, bias
+end
+
+function hysomi_synthetic_trait_encoder(trait_ranges::AbstractMatrix; input_dim::Integer = length(HYSOMI_BIOPAR_NAMES), hidden_dim::Integer = 38, depth::Integer = 3, rng = nothing)
+    size(trait_ranges, 2) == 2 || throw(ArgumentError("trait_ranges must have two columns"))
+    output_dim = size(trait_ranges, 1)
+    depth > 0 || throw(ArgumentError("depth must be positive"))
+
+    layer_dims = vcat(input_dim, fill(hidden_dim, depth), output_dim)
+    weights = Vector{Matrix{Float64}}(undef, length(layer_dims) - 1)
+    biases = Vector{Vector{Float64}}(undef, length(layer_dims) - 1)
+    for index in 1:length(weights)
+        weights[index], biases[index] = _hysomi_uniform_layer(layer_dims[index + 1], layer_dims[index]; rng = rng)
+    end
+
+    parameter_names = ntuple(index -> Symbol(:trait_, index), output_dim)
+    return TraitEncoder(weights, biases, relu; output_activation = sigmoid, parameter_names = parameter_names, parameter_ranges = trait_ranges)
+end
+
 function hysomi_latin_hypercube(ranges::AbstractMatrix, n::Integer; rng = nothing)
     n > 0 || throw(ArgumentError("n must be positive"))
     size(ranges, 2) == 2 || throw(ArgumentError("ranges must have two columns"))
@@ -62,6 +92,19 @@ function hysomi_generate_synthetic_sample(trait_map, teacher_encoder::TraitEncod
     traits = hysomi_traits_from_parameters(trait_map, parameters)
     sample = hysomi_generate_sample(teacher_encoder, traits, soilpar, u0, tspan; kwargs...)
     return (; sample..., parameters = collect(parameters))
+end
+
+function _hysomi_parameter_namedtuple(parameters)
+    length(parameters) == length(HYSOMI_BIOPAR_NAMES) || throw(ArgumentError("parameter vector must have $(length(HYSOMI_BIOPAR_NAMES)) values"))
+    return NamedTuple{HYSOMI_BIOPAR_NAMES}(Tuple(collect(parameters)))
+end
+
+function hysomi_generate_python_style_synthetic_sample(trait_map, parameters, soilpar, u0::AbstractVector, tspan::Tuple{<:Real, <:Real}; kwargs...)
+    biopar = _hysomi_parameter_namedtuple(parameters)
+    model = build_hysomi_model(hysomi_state_layout(), build_hysomi_parameters(biopar, soilpar))
+    solution = simulate(model, u0, tspan; kwargs...)
+    traits = hysomi_traits_from_parameters(trait_map, parameters)
+    return (; traits = collect(traits), target = hysomi_trajectory_matrix(solution), soilpar, u0 = collect(u0), tspan, parameters = collect(parameters))
 end
 
 function hysomi_process_filter(target::AbstractMatrix;
@@ -140,7 +183,6 @@ end
 
 function hysomi_generate_python_style_synthetic_dataset(
     trait_map,
-    teacher_encoder::TraitEncoder,
     parameter_ranges::AbstractMatrix,
     n::Integer;
     soilpar,
@@ -162,7 +204,7 @@ function hysomi_generate_python_style_synthetic_dataset(
     )
 
     raw_dataset = [
-        hysomi_generate_synthetic_sample(trait_map, teacher_encoder, view(raw_parameters, index, :), soilpar, u0, tspan; kwargs...)
+        hysomi_generate_python_style_synthetic_sample(trait_map, view(raw_parameters, index, :), soilpar, u0, tspan; kwargs...)
         for index in 1:size(raw_parameters, 1)
     ]
 
