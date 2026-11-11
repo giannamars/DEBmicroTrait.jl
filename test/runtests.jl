@@ -620,13 +620,26 @@ end
 @testset "hysomi synthetic data example" begin
     if Base.find_package("OrdinaryDiffEq") !== nothing
         include(joinpath(@__DIR__, "..", "examples", "hysomi_synthetic_data_example.jl"))
-        result = run_hysomi_synthetic_data_example(2)
+        output_path = mktempdir()
+        result = run_hysomi_synthetic_data_example(2; output_path = output_path, save_artifacts = true)
         @test size(result.raw_parameters, 2) == length(HYSOMI_BIOPAR_NAMES)
         @test length(result.raw_dataset) == size(result.raw_parameters, 1)
         @test length(result.mask) == length(result.raw_dataset)
         @test length(result.filtered_dataset) == count(identity, result.mask)
         @test all(sample -> length(sample.traits) == HYSOMI_TRAIT_INPUT_DIM, result.raw_dataset)
         @test all(sample -> size(sample.target, 1) == length(HYSOMI_STATE_NAMES), result.raw_dataset)
+        @test isfile(joinpath(output_path, "synthetic_data_bundle.jls"))
+        @test isfile(joinpath(output_path, "raw_dataset.jls"))
+        @test isfile(joinpath(output_path, "filtered_dataset.jls"))
+        @test isfile(joinpath(output_path, "synthetic_data_summary.jls"))
+        @test isfile(joinpath(output_path, "synthetic_data.toml"))
+
+        loaded = hysomi_load_synthetic_dataset_bundle(output_path)
+        @test length(loaded.bundle.raw_dataset) == length(result.raw_dataset)
+        @test length(loaded.bundle.filtered_dataset) == length(result.filtered_dataset)
+        @test loaded.summary.raw_count == length(result.raw_dataset)
+        @test loaded.summary.filtered_count == length(result.filtered_dataset)
+        @test haskey(loaded.config, "n")
     else
         @test true
     end

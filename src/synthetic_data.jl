@@ -172,3 +172,74 @@ function hysomi_generate_python_style_synthetic_dataset(
 
     return (; raw_parameters, raw_dataset, mask, filtered_parameters, filtered_dataset)
 end
+
+function _hysomi_write_serialized(path::AbstractString, value)
+    open(path, "w") do io
+        Serialization.serialize(io, value)
+    end
+    return path
+end
+
+function hysomi_save_synthetic_dataset_bundle(out_dir::AbstractString, bundle; config = nothing, overwrite::Bool = true)
+    mkpath(out_dir)
+
+    paths = Dict{String,String}()
+    artifact_paths = (
+        bundle = joinpath(out_dir, "synthetic_data_bundle.jls"),
+        raw_parameters = joinpath(out_dir, "raw_parameters.jls"),
+        raw_dataset = joinpath(out_dir, "raw_dataset.jls"),
+        mask = joinpath(out_dir, "mask.jls"),
+        filtered_parameters = joinpath(out_dir, "filtered_parameters.jls"),
+        filtered_dataset = joinpath(out_dir, "filtered_dataset.jls"),
+    )
+
+    for (name, path) in pairs(artifact_paths)
+        if !overwrite && isfile(path)
+            throw(ArgumentError("refusing to overwrite existing file $path"))
+        end
+        value = name == :bundle ? bundle : getproperty(bundle, name)
+        _hysomi_write_serialized(path, value)
+        paths[String(name)] = path
+    end
+
+    if config !== nothing
+        config_path = joinpath(out_dir, "synthetic_data.toml")
+        if !overwrite && isfile(config_path)
+            throw(ArgumentError("refusing to overwrite existing file $config_path"))
+        end
+        open(config_path, "w") do io
+            TOML.print(io, _hysomi_config_value(config))
+        end
+        paths["config"] = config_path
+    end
+
+    sorted_paths = [Symbol(key) => value for (key, value) in sort(collect(paths); by = first)]
+    summary = (
+        out_dir = out_dir,
+        raw_count = length(bundle.raw_dataset),
+        filtered_count = length(bundle.filtered_dataset),
+        paths = (; sorted_paths...),
+    )
+
+    _hysomi_write_serialized(joinpath(out_dir, "synthetic_data_summary.jls"), summary)
+    return summary
+end
+
+function hysomi_load_synthetic_dataset_bundle(out_dir::AbstractString)
+    bundle_path = joinpath(out_dir, "synthetic_data_bundle.jls")
+    summary_path = joinpath(out_dir, "synthetic_data_summary.jls")
+    config_path = joinpath(out_dir, "synthetic_data.toml")
+
+    isfile(bundle_path) || throw(ArgumentError("missing synthetic dataset bundle at $bundle_path"))
+    isfile(summary_path) || throw(ArgumentError("missing synthetic dataset summary at $summary_path"))
+
+    bundle = open(bundle_path, "r") do io
+        Serialization.deserialize(io)
+    end
+    summary = open(summary_path, "r") do io
+        Serialization.deserialize(io)
+    end
+
+    config = isfile(config_path) ? TOML.parsefile(config_path) : nothing
+    return (; bundle, summary, config)
+end

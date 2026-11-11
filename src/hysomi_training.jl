@@ -380,7 +380,7 @@ function _hysomi_config_value(value)
         return Dict(string(key) => _hysomi_config_value(getproperty(value, key)) for key in keys(value))
     elseif value isa AbstractDict
         return Dict(string(key) => _hysomi_config_value(entry) for (key, entry) in value)
-    elseif value isa AbstractArray
+    elseif value isa AbstractArray || value isa Tuple
         return [_hysomi_config_value(entry) for entry in value]
     elseif value isa Symbol
         return String(value)

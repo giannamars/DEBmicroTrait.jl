@@ -41,6 +41,11 @@ The Julia Hysomi scaffold mirrors the Python workflow in three small steps:
 2. Run training with `examples/hysomi_start_training.jl`.
 3. Inspect a saved run with `examples/hysomi_post_training_analysis.jl`.
 
+The synthetic-data example can also save a reproducible on-disk bundle
+(`synthetic_data_bundle.jls`, split dataset files, and `synthetic_data.toml`) by
+calling `run_hysomi_synthetic_data_example(save_artifacts = true)`.
+You can restore it with `hysomi_load_synthetic_dataset_bundle(path)`.
+
 The end-to-end helper is `hysomi_run_experiment`, which ties generation, training, and evaluation together.
 
 ```julia
