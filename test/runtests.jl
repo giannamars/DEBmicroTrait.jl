@@ -363,7 +363,7 @@ end
                 HYSOMI_SMOKE_TRAITS,
                 reverse(HYSOMI_SMOKE_TRAITS);
                 NN_hyperpar = (model = "hysomi_trait_encoder", input_dim = HYSOMI_TRAIT_INPUT_DIM),
-                loss_hyperpar = (data_sel = collect(eachindex(HYSOMI_STATE_NAMES)), k = 1e3),
+                loss_hyperpar = (data_sel = collect(eachindex(HYSOMI_STATE_NAMES)), k = 1e3, awl = "AutomaticWeightedLossL2"),
                 training_hyperpar = (epochs = 2, batch_size = 1, lr = 1e-10, validation_fraction = 0.0, shuffle = false),
                 training_outputs_library_path = tempdir,
                 soilpar = HYSOMI_SMOKE_SOILPAR,
@@ -405,6 +405,28 @@ end
             @test isfile(joinpath(run_dir, "train_dataset.jls"))
             @test isfile(joinpath(run_dir, "test_dataset.jls"))
             @test isfinite(result.evaluation_loss)
+        end
+    else
+        @test true
+    end
+end
+
+@testset "hysomi post training analysis" begin
+    if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
+        include(joinpath(@__DIR__, "..", "examples", "hysomi_start_training.jl"))
+        include(joinpath(@__DIR__, "..", "examples", "hysomi_post_training_analysis.jl"))
+        mktempdir() do tempdir
+            data_path = joinpath(tempdir, "synthetic_data")
+            output_path = joinpath(tempdir, "outputs")
+            start_result = run_hysomi_start_training_example(; data_path = data_path, output_path = output_path, save_artifacts = true)
+            hash_id = split(basename(start_result.bundle.out_dir), "train_")[end]
+            analysis = DEBmicroTrait.hysomi_post_training_analysis(output_path, hash_id)
+
+            @test analysis.run_class == "HySoMi"
+            @test hasproperty(analysis, :config)
+            @test hasproperty(analysis, :dataset)
+            @test hasproperty(analysis, :evaluation_result)
+            @test isfinite(start_result.evaluation_loss)
         end
     else
         @test true

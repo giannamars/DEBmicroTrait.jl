@@ -19,7 +19,7 @@ function run_hysomi_start_training_example(; data_path = HYSOMI_START_DATA_PATH,
         HYSOMI_SMOKE_TRAITS,
         reverse(HYSOMI_SMOKE_TRAITS);
         NN_hyperpar = (model = "hysomi_trait_encoder", input_dim = HYSOMI_TRAIT_INPUT_DIM),
-        loss_hyperpar = (data_sel = collect(eachindex(HYSOMI_STATE_NAMES)), k = 1e3),
+        loss_hyperpar = (data_sel = collect(eachindex(HYSOMI_STATE_NAMES)), k = 1e3, awl = "AutomaticWeightedLossL2"),
         training_hyperpar = (epochs = 2, batch_size = 1, lr = 1e-10, validation_fraction = 0.0, shuffle = false),
         training_outputs_library_path = output_path,
         soilpar = HYSOMI_SMOKE_SOILPAR,

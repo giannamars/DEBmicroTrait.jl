@@ -454,6 +454,111 @@ function hysomi_load_serialized_dataset(dataset_path::AbstractString)
     end
 end
 
+function hysomi_flatten_config_dict(config)
+    if config isa AbstractDict
+        flattened = Dict{String,Any}()
+        for (key, value) in config
+            if value isa AbstractDict
+                for (subkey, subvalue) in value
+                    flattened[string(subkey)] = subvalue
+                end
+            else
+                flattened[string(key)] = value
+            end
+        end
+        return flattened
+    elseif config isa NamedTuple
+        return hysomi_flatten_config_dict(_hysomi_dict(config))
+    else
+        throw(ArgumentError("config must be a dict or named tuple"))
+    end
+end
+
+function hysomi_classify_run(config)
+    if haskey(config, "awl") && occursin("Auto", string(config["awl"]))
+        return "HySoMi"
+    elseif haskey(config, "data_sel")
+        data_sel = config["data_sel"]
+        if data_sel isa AbstractVector && !isempty(data_sel) && first(data_sel) == 5
+            return "Unconstrained"
+        elseif data_sel isa AbstractVector && !isempty(data_sel) && first(data_sel) == 0
+            return "All states"
+        end
+    end
+    return "Unknown"
+end
+
+function hysomi_load_config_dict(path::AbstractString)
+    list_files = readdir(path)
+    config_files = filter(name -> occursin("hyper_dict", name), list_files)
+    isempty(config_files) && throw(ArgumentError("no config file found in $path"))
+    config = TOML.parsefile(joinpath(path, first(config_files)))
+    flattened = hysomi_flatten_config_dict(config)
+    delete!(flattened, "model_repr")
+    return flattened
+end
+
+function hysomi_load_model(config::AbstractDict)
+    model_name = String(config["model"])
+    model_name == "hysomi_trait_encoder" && return hysomi_trait_encoder(
+        (zeros(20, Int(get(config, "input_dim", HYSOMI_TRAIT_INPUT_DIM))), zeros(Int(get(config, "output_dim", length(HYSOMI_BIOPAR_NAMES))), 20)),
+        (zeros(20), zeros(Int(get(config, "output_dim", length(HYSOMI_BIOPAR_NAMES))))),
+    )
+    throw(ArgumentError("unknown model $(model_name)"))
+end
+
+function hysomi_load_dataset_dict(dataset_path::AbstractString)
+    if isfile(dataset_path)
+        return open(dataset_path, "r") do io
+            Serialization.deserialize(io)
+        end
+    end
+
+    list_files = readdir(dataset_path)
+    dataset_names = ["trait", "X", "outputs", "ini", "soil"]
+    dataset = Dict{String,Any}()
+    for name in dataset_names
+        matches = filter(file -> startswith(file, name), list_files)
+        isempty(matches) && continue
+        open(joinpath(dataset_path, first(matches)), "r") do io
+            dataset[name] = Serialization.deserialize(io)
+        end
+    end
+    return dataset
+end
+
+function hysomi_inference(trained_model, hyperparameter_dict::AbstractDict, test_dataset_dict::AbstractDict)
+    days = hyperparameter_dict["days"]
+    time_data = collect(range(0.0, days, length = Int(days * 24)))
+    ODE_model = HysomiModel(hysomi_state_layout(), build_hysomi_parameters(trait_parameters(trained_model, test_dataset_dict["trait"][1]), test_dataset_dict["soil"][1]))
+    loss = hysomi_batch_loss(hysomi_encoder_state(trained_model), test_dataset_dict["outputs"], trained_model; alg = nothing, sensealg = nothing, saveat = 1.0)
+    return Dict("test_loss" => loss, "days" => days, "n_times" => length(time_data))
+end
+
+function hysomi_post_training_analysis(output_library_path::AbstractString, hash_id::AbstractString; save_summary::Bool = true)
+    run_path = joinpath(output_library_path, "train_" * hash_id)
+    config = hysomi_load_config_dict(run_path)
+    dataset = hysomi_load_dataset_dict(get(config, "dataset_path", run_path))
+    trained_model = hysomi_load_model(config)
+    training_result_path = joinpath(run_path, "training_result.jls")
+    evaluation_result_path = joinpath(run_path, "evaluation_result.jls")
+    training_result = isfile(training_result_path) ? open(training_result_path, "r") do io
+        Serialization.deserialize(io)
+    end : nothing
+    evaluation_result = isfile(evaluation_result_path) ? open(evaluation_result_path, "r") do io
+        Serialization.deserialize(io)
+    end : nothing
+    summary = (; config, dataset, trained_model, training_result, evaluation_result, run_class = hysomi_classify_run(config))
+
+    if save_summary
+        open(joinpath(run_path, "post_training_summary.jls"), "w") do io
+            Serialization.serialize(io, summary)
+        end
+    end
+
+    return summary
+end
+
 function _hysomi_training_hyperparameters(training_hyperpar)
     epochs = Int(get(training_hyperpar, "n_epochs", get(training_hyperpar, "epochs", 1)))
     batch_size = Int(get(training_hyperpar, "batch_size", 1))
@@ -519,7 +624,7 @@ function hysomi_run_experiment(
     train_traits::AbstractVector,
     test_traits::AbstractVector = train_traits;
     NN_hyperpar = (model = "hysomi_trait_encoder", input_dim = HYSOMI_TRAIT_INPUT_DIM),
-    loss_hyperpar = (data_sel = collect(eachindex(HYSOMI_STATE_NAMES)), k = 1e3),
+    loss_hyperpar = (data_sel = collect(eachindex(HYSOMI_STATE_NAMES)), k = 1e3, awl = "AutomaticWeightedLossL2"),
     training_hyperpar = NamedTuple(),
     training_outputs_library_path = pwd(),
     soilpar,
