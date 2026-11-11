@@ -271,6 +271,234 @@ function hysomi_batch_loss(state, batch::AbstractVector, template::TraitEncoder;
     return total / length(batch)
 end
 
+function hysomi_batch_indices(n::Integer, batch_size::Integer; shuffle::Bool = true, rng = nothing)
+    n > 0 || throw(ArgumentError("n must be positive"))
+    batch_size > 0 || throw(ArgumentError("batch_size must be positive"))
+
+    indices = collect(1:n)
+    if shuffle
+        order = rng === nothing ? sortperm(rand(n)) : sortperm(rand(rng, n))
+        indices = indices[order]
+    end
+
+    batches = Vector{Vector{Int}}()
+    for first_index in 1:batch_size:n
+        last_index = min(first_index + batch_size - 1, n)
+        push!(batches, indices[first_index:last_index])
+    end
+    return batches
+end
+
+function hysomi_split_dataset(dataset::AbstractVector; validation_fraction::Real = 0.2, shuffle::Bool = true, rng = nothing)
+    0 <= validation_fraction < 1 || throw(ArgumentError("validation_fraction must be in [0, 1)"))
+    n = length(dataset)
+    n > 0 || throw(ArgumentError("dataset must not be empty"))
+
+    indices = collect(1:n)
+    if shuffle
+        order = rng === nothing ? sortperm(rand(n)) : sortperm(rand(rng, n))
+        indices = indices[order]
+    end
+
+    validation_count = validation_fraction == 0 ? 0 : max(1, round(Int, n * validation_fraction))
+    validation_count = min(validation_count, max(n - 1, 0))
+    split_index = n - validation_count
+    split_index = max(1, split_index)
+    train_indices = indices[1:split_index]
+    validation_indices = indices[split_index+1:end]
+
+    return dataset[train_indices], dataset[validation_indices]
+end
+
+function hysomi_train_epoch(state, dataset::AbstractVector, template::TraitEncoder;
+    batch_size::Integer = 1,
+    step_size = 1e-3,
+    backend = Zygote.withgradient,
+    shuffle::Bool = true,
+    rng = nothing,
+    kwargs...,
+)
+    batch_size > 0 || throw(ArgumentError("batch_size must be positive"))
+    batches = hysomi_batch_indices(length(dataset), batch_size; shuffle = shuffle, rng = rng)
+
+    current_state = collect(state)
+    batch_losses = Float64[]
+    for batch_indices in batches
+        batch = dataset[batch_indices]
+        result = hysomi_training_step(current_state, batch, template; step_size = step_size, backend = backend, kwargs...)
+        push!(batch_losses, result.value)
+        current_state = result.updated_state
+    end
+
+    return (; state = current_state, batch_losses, loss = isempty(batch_losses) ? NaN : sum(batch_losses) / length(batch_losses))
+end
+
+function hysomi_train(state, dataset::AbstractVector, template::TraitEncoder;
+    epochs::Integer = 1,
+    batch_size::Integer = 1,
+    step_size = 1e-3,
+    backend = Zygote.withgradient,
+    validation_set = nothing,
+    validation_fraction::Real = 0.0,
+    shuffle::Bool = true,
+    rng = nothing,
+    kwargs...,
+)
+    epochs > 0 || throw(ArgumentError("epochs must be positive"))
+
+    train_dataset = dataset
+    validation_data = validation_set
+    if validation_data === nothing && validation_fraction > 0
+        train_dataset, validation_data = hysomi_split_dataset(dataset; validation_fraction = validation_fraction, shuffle = shuffle, rng = rng)
+    end
+
+    train_losses = Vector{Float64}(undef, epochs)
+    validation_losses = validation_data === nothing ? Float64[] : Vector{Float64}(undef, epochs)
+    current_state = collect(state)
+
+    for epoch in 1:epochs
+        epoch_result = hysomi_train_epoch(current_state, train_dataset, template;
+            batch_size = batch_size,
+            step_size = step_size,
+            backend = backend,
+            shuffle = shuffle,
+            rng = rng,
+            kwargs...,
+        )
+        current_state = epoch_result.state
+        train_losses[epoch] = epoch_result.loss
+        if validation_data !== nothing
+            validation_losses[epoch] = hysomi_batch_loss(current_state, validation_data, template; kwargs...)
+        end
+    end
+
+    return (; state = current_state, train_losses, validation_losses)
+end
+
+function _hysomi_config_value(value)
+    if value isa NamedTuple
+        return Dict(string(key) => _hysomi_config_value(getproperty(value, key)) for key in keys(value))
+    elseif value isa AbstractDict
+        return Dict(string(key) => _hysomi_config_value(entry) for (key, entry) in value)
+    elseif value isa AbstractArray
+        return [_hysomi_config_value(entry) for entry in value]
+    elseif value isa Symbol
+        return String(value)
+    else
+        return value
+    end
+end
+
+function _hysomi_config_string(value)
+    if value isa NamedTuple
+        parts = [string(key, "=", _hysomi_config_string(getproperty(value, key))) for key in keys(value)]
+        return "(" * join(parts, ",") * ")"
+    elseif value isa AbstractDict
+        entries = sort!(collect(value); by = first)
+        parts = [string(key, "=", _hysomi_config_string(entry)) for (key, entry) in entries]
+        return "{" * join(parts, ",") * "}"
+    elseif value isa AbstractArray
+        return "[" * join(_hysomi_config_string.(value), ",") * "]"
+    else
+        return sprint(show, value)
+    end
+end
+
+function hysomi_training_hash(config; length_id::Integer = 12)
+    length_id > 0 || throw(ArgumentError("length_id must be positive"))
+    digest = bytes2hex(SHA.sha256(codeunits(_hysomi_config_string(config))))
+    return digest[1:min(length_id, lastindex(digest))]
+end
+
+function hysomi_hyperpar_to_toml(NN_hyperpar, loss_hyperpar, training_hyperpar, training_outputs_library_path; length_id::Integer = 12)
+    config = (; NN_hyperpars = NN_hyperpar, loss_hyperpar = loss_hyperpar, training_hyperpar = training_hyperpar)
+    hash_id = hysomi_training_hash(config; length_id = length_id)
+    out_dir = joinpath(String(training_outputs_library_path), "train_" * hash_id)
+    mkpath(out_dir)
+    path_to_file = joinpath(out_dir, "hyper_dict.toml")
+    open(path_to_file, "w") do io
+        TOML.print(io, _hysomi_config_value(config))
+    end
+    return (; config, hash_id, out_dir, path_to_file)
+end
+
+function hysomi_load_training_config(config_path::AbstractString)
+    return TOML.parsefile(config_path)
+end
+
+function hysomi_save_training_result(out_dir::AbstractString, result)
+    mkpath(out_dir)
+    open(joinpath(out_dir, "training_result.jls"), "w") do io
+        Serialization.serialize(io, result)
+    end
+    return joinpath(out_dir, "training_result.jls")
+end
+
+function hysomi_load_serialized_dataset(dataset_path::AbstractString)
+    open(dataset_path, "r") do io
+        return Serialization.deserialize(io)
+    end
+end
+
+function _hysomi_training_hyperparameters(training_hyperpar)
+    epochs = Int(get(training_hyperpar, "n_epochs", get(training_hyperpar, "epochs", 1)))
+    batch_size = Int(get(training_hyperpar, "batch_size", 1))
+    step_size = get(training_hyperpar, "lr", get(training_hyperpar, "step_size", 1e-3))
+    validation_fraction = get(training_hyperpar, "validation_fraction", 0.0)
+    shuffle = get(training_hyperpar, "shuffle", true)
+    seed = haskey(training_hyperpar, "seed") ? training_hyperpar["seed"] : nothing
+    return (; epochs, batch_size, step_size, validation_fraction, shuffle, seed)
+end
+
+function hysomi_train_from_config(config_path::AbstractString, template::TraitEncoder;
+    dataset_loader = hysomi_load_serialized_dataset,
+    initial_state = hysomi_encoder_state(template),
+    out_dir = nothing,
+    save_result::Bool = false,
+    backend = Zygote.withgradient,
+    kwargs...,
+)
+    config = hysomi_load_training_config(config_path)
+    training_hyperpar = get(config, "training_hyperpar", config)
+    haskey(training_hyperpar, "dataset_path") || throw(ArgumentError("training config must contain dataset_path"))
+
+    if out_dir === nothing && haskey(training_hyperpar, "output_dir")
+        out_dir = training_hyperpar["output_dir"]
+    end
+
+    dataset = dataset_loader(String(training_hyperpar["dataset_path"]))
+    hyper = _hysomi_training_hyperparameters(training_hyperpar)
+    state = haskey(training_hyperpar, "initial_state") ? collect(training_hyperpar["initial_state"]) : collect(initial_state)
+
+    result = hysomi_train(state, dataset, template;
+        epochs = hyper.epochs,
+        batch_size = hyper.batch_size,
+        step_size = hyper.step_size,
+        backend = backend,
+        validation_fraction = hyper.validation_fraction,
+        shuffle = hyper.shuffle,
+        kwargs...,
+    )
+
+    if save_result && out_dir !== nothing
+        hysomi_save_training_result(String(out_dir), result)
+    end
+
+    return (; config, result, out_dir)
+end
+
+function hysomi_train_from_config(config::AbstractDict, template::TraitEncoder; kwargs...)
+    temp_path = tempname()
+    open(temp_path, "w") do io
+        TOML.print(io, _hysomi_config_value(config))
+    end
+    try
+        return hysomi_train_from_config(temp_path, template; kwargs...)
+    finally
+        isfile(temp_path) && rm(temp_path; force = true)
+    end
+end
+
 function hysomi_update_state(state, gradient, step_size)
     return state .- step_size .* gradient
 end
@@ -283,15 +511,6 @@ function hysomi_training_step(state, batch::AbstractVector, template::TraitEncod
 end
 
 function hysomi_training_epoch(state, dataset::AbstractVector, template::TraitEncoder; batch_size = 1, step_size = 1e-3, backend = Zygote.withgradient, kwargs...)
-    batch_size > 0 || throw(ArgumentError("batch_size must be positive"))
-    losses = Float64[]
-    current_state = state
-    for first_index in 1:batch_size:length(dataset)
-        last_index = min(first_index + batch_size - 1, length(dataset))
-        batch = dataset[first_index:last_index]
-        result = hysomi_training_step(current_state, batch, template; step_size = step_size, backend = backend, kwargs...)
-        push!(losses, result.value)
-        current_state = result.updated_state
-    end
-    return (; state = current_state, losses)
+    epoch_result = hysomi_train_epoch(state, dataset, template; batch_size = batch_size, step_size = step_size, backend = backend, kwargs...)
+    return (; state = epoch_result.state, losses = epoch_result.batch_losses)
 end

@@ -1,6 +1,7 @@
 using Test
 using DEBmicroTrait
 using LinearAlgebra
+using Serialization
 
 make_hysomi_smoke_encoder(weight_offset, bias_offset) = TraitEncoder(
     (
@@ -247,6 +248,106 @@ end
         @test all(isfinite, result.gradient)
         @test all(isfinite, parameter_vector(result.updated_parameters))
         @test isfinite(result.updated_value)
+    else
+        @test true
+    end
+end
+
+@testset "hysomi training loop" begin
+    if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
+        include(joinpath(@__DIR__, "..", "examples", "hysomi_training_smoke.jl"))
+        dataset = hysomi_generate_dataset(
+            HYSOMI_SMOKE_TEACHER,
+            HYSOMI_SMOKE_TRAITS;
+            soilpar = HYSOMI_SMOKE_SOILPAR,
+            u0 = HYSOMI_SMOKE_U0,
+            tspan = HYSOMI_SMOKE_TSPAN,
+            alg = HYSOMI_SMOKE_ALG,
+            adaptive = false,
+            dt = 0.01,
+            saveat = 1.0,
+        )
+        state = hysomi_encoder_state(HYSOMI_SMOKE_TEMPLATE)
+        result = hysomi_train(
+            state,
+            dataset,
+            HYSOMI_SMOKE_TEMPLATE;
+            epochs = 2,
+            batch_size = 1,
+            validation_fraction = 0.5,
+            step_size = 1e-10,
+            backend = Zygote.withgradient,
+            alg = HYSOMI_SMOKE_ALG,
+            sensealg = HYSOMI_SMOKE_SENSEALG,
+            saveat = 1.0,
+            shuffle = false,
+        )
+
+        @test length(result.train_losses) == 2
+        @test length(result.validation_losses) == 2
+        @test all(isfinite, result.train_losses)
+        @test all(isfinite, result.validation_losses)
+        @test length(result.state) == length(state)
+    else
+        @test true
+    end
+end
+
+@testset "hysomi config wrapper" begin
+    if all(pkg -> Base.find_package(pkg) !== nothing, ("OrdinaryDiffEq", "SciMLSensitivity", "Zygote"))
+        include(joinpath(@__DIR__, "..", "examples", "hysomi_training_smoke.jl"))
+        mktempdir() do tempdir
+            dataset = hysomi_generate_dataset(
+                HYSOMI_SMOKE_TEACHER,
+                HYSOMI_SMOKE_TRAITS;
+                soilpar = HYSOMI_SMOKE_SOILPAR,
+                u0 = HYSOMI_SMOKE_U0,
+                tspan = HYSOMI_SMOKE_TSPAN,
+                alg = HYSOMI_SMOKE_ALG,
+                adaptive = false,
+                dt = 0.01,
+                saveat = 1.0,
+            )
+            dataset_path = joinpath(tempdir, "dataset.jls")
+            open(dataset_path, "w") do io
+                Serialization.serialize(io, dataset)
+            end
+
+            training_hyperpar = Dict(
+                "dataset_path" => dataset_path,
+                "epochs" => 2,
+                "batch_size" => 1,
+                "lr" => 1e-10,
+                "validation_fraction" => 0.5,
+                "shuffle" => false,
+                "seed" => 123,
+            )
+            bundle = hysomi_hyperpar_to_toml(
+                (model = "hysomi", input_dim = HYSOMI_TRAIT_INPUT_DIM),
+                (data_sel = [1, 2, 3, 4, 5, 6], k = 1e3),
+                training_hyperpar,
+                tempdir;
+                length_id = 8,
+            )
+            result = hysomi_train_from_config(
+                bundle.path_to_file,
+                HYSOMI_SMOKE_TEMPLATE;
+                dataset_loader = hysomi_load_serialized_dataset,
+                initial_state = hysomi_encoder_state(HYSOMI_SMOKE_TEMPLATE),
+                out_dir = bundle.out_dir,
+                save_result = true,
+                backend = Zygote.withgradient,
+                alg = HYSOMI_SMOKE_ALG,
+                sensealg = HYSOMI_SMOKE_SENSEALG,
+                saveat = 1.0,
+            )
+
+            @test isfile(bundle.path_to_file)
+            @test isfile(joinpath(bundle.out_dir, "training_result.jls"))
+            @test length(result.result.train_losses) == 2
+            @test all(isfinite, result.result.train_losses)
+            @test all(isfinite, result.result.validation_losses)
+        end
     else
         @test true
     end
