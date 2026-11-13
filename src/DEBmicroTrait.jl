@@ -2,6 +2,7 @@ module DEBmicroTrait
 
 import SHA
 import Serialization
+import SciMLBase
 import TOML
 
 include("core.jl")
