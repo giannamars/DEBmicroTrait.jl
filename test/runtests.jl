@@ -112,6 +112,74 @@ end
     @test TinyTrainingParameters(named_parameters) == TinyTrainingParameters(0.5, 0.4, 0.1)
 end
 
+@testset "trait csv preprocessing" begin
+    csv_path = tempname()
+    open(csv_path, "w") do io
+        write(io, ",id,presence,gene_count,generation_time,opt_temp\n")
+        write(io, "1,mag_1,1,0,10,NaN\n")
+        write(io, "2,mag_2,0,3,20,30\n")
+        write(io, "3,mag_3,1,9,,40\n")
+    end
+
+    result = load_and_preprocess_traits(
+        csv_path;
+        id_column = :id,
+        binary_columns = [:presence],
+        count_columns = [:gene_count],
+        continuous_columns = [:generation_time, :opt_temp],
+    )
+
+    @test size(result.data) == (3, 4)
+    @test result.ids == ["mag_1", "mag_2", "mag_3"]
+    @test result.data[:, 1] == [1.0, 0.0, 1.0]
+    @test isapprox(result.data[:, 2], [0.0, 0.6020599913279624, 1.0]; atol = 1e-12)
+    @test isapprox(result.data[1, 3], -0.7071067811865475; atol = 1e-12)
+    @test isapprox(result.data[2, 3], 0.7071067811865475; atol = 1e-12)
+    @test result.data[3, 3] == 0.0
+    @test result.data[1, 4] == 0.0
+    @test isapprox(result.data[2, 4], -0.7071067811865475; atol = 1e-12)
+    @test isapprox(result.data[3, 4], 0.7071067811865475; atol = 1e-12)
+
+    output_path = tempname()
+    save_preprocessed_traits(output_path, result)
+    @test isfile(output_path)
+    @test occursin("id,presence,gene_count,generation_time,opt_temp", read(output_path, String))
+
+    schema_path = tempname()
+    save_trait_schema(schema_path, result.preprocessor)
+    roundtrip = load_and_preprocess_traits(csv_path; schema_file = schema_path)
+    @test roundtrip.ids == result.ids
+    @test roundtrip.data == result.data
+
+    relabund_path = tempname()
+    open(relabund_path, "w") do io
+        write(io, "id,rel.abund\n")
+        write(io, "mag_1,0.1\n")
+        write(io, "mag_2,0.2\n")
+        write(io, "mag_3,0.3\n")
+    end
+
+    merged = load_and_preprocess_traits(
+        csv_path;
+        id_column = :id,
+        binary_columns = [:presence],
+        count_columns = [:gene_count],
+        continuous_columns = [:generation_time, :opt_temp],
+        relabund_file = relabund_path,
+    )
+    @test merged.relabund == [0.1, 0.2, 0.3]
+
+    summary = trait_preprocessing_summary(result)
+    @test summary.n_rows == 3
+    @test summary.n_features == 4
+    @test summary.n_ids == 3
+    @test summary.has_id
+    @test !summary.has_relabund
+    @test summary.n_binary == 1
+    @test summary.n_count == 1
+    @test summary.n_continuous == 2
+end
+
 @testset "mass balance" begin
     layout = build_state_layout([:substrate, :biomass, :mineral], [1, 1, 1])
     model = build_model(layout, build_parameters((k_uptake = 0.5, yield = 0.4, k_decay = 0.1)))
